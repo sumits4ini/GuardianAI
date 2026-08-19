@@ -3,22 +3,22 @@
 import React, { useState, useRef, useEffect } from "react";
 import { DistressChatMessage, DistressAnalysisResult } from "@/types";
 import { useGuardian } from "@/lib/store/demo-context";
-import { Sparkles, Send, Bot, User, CheckCircle2, ShieldAlert, ShieldCheck } from "lucide-react";
+import { Sparkles, Send, Bot, User, CheckCircle2, ShieldAlert, ShieldCheck, HelpCircle, Navigation } from "lucide-react";
 
-const SAMPLE_DISTRESS_QUERIES = [
-  "Someone has been following me for 2 blocks and I'm alone.",
-  "I'm stranded on an unlit street and feel uncomfortable.",
-  "My rideshare driver took an unexpected detour into a dark lane.",
-  "There's an aggressive group loitering ahead on my sidewalk.",
+const QUICK_SAFETY_QUESTIONS = [
+  "Why is my risk score high?",
+  "What should I do right now?",
+  "Analyze my current journey status.",
+  "Someone is following me and I need help.",
 ];
 
 export function AIChat() {
-  const { triggerSOS, currentCoords, activeJourney } = useGuardian();
+  const { triggerSOS, currentCoords, activeJourney, riskAssessment } = useGuardian();
   const [messages, setMessages] = useState<DistressChatMessage[]>([
     {
       id: "msg_welcome",
       sender: "assistant",
-      message: "Hello, I am GuardianAI Safety Intelligence Assistant. Tell me what you are experiencing or if you feel unsafe.",
+      message: "Hello, I am your GuardianAI Safety Intelligence Assistant. Ask me about your current risk score, safety recommendations, or describe any situation where you feel unsafe.",
       timestamp: new Date().toISOString(),
     },
   ]);
@@ -46,29 +46,43 @@ export function AIChat() {
     setIsTyping(true);
 
     try {
-      const res = await fetch("/api/ai/analyze-distress", {
+      // 1. Check if user is asking general safety questions or reporting distress
+      const res = await fetch("/api/ai/assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: text,
-          locationContext: {
-            latitude: currentCoords.lat,
-            longitude: currentCoords.lng,
+          safetyContext: {
+            journeyStatus: activeJourney?.status || "STANDBY",
             destination: activeJourney?.destinationName,
+            riskScore: riskAssessment.riskScore,
+            riskLevel: riskAssessment.riskLevel,
+            signals: riskAssessment.signals,
+            nearbyHazardsCount: 0,
+            isOverdue: activeJourney?.status === "ATTENTION_REQUIRED",
           },
         }),
       });
 
       if (res.ok) {
         const data = await res.json();
-        const analysis: DistressAnalysisResult = data.analysis;
-
         const aiMsg: DistressChatMessage = {
           id: `ai_${Date.now()}`,
           sender: "assistant",
-          message: analysis.safeAdvice,
+          message: data.reply,
           timestamp: new Date().toISOString(),
-          analysis,
+          analysis: data.shouldShowSOSPrompt ? {
+            riskLevel: "CRITICAL",
+            urgency: "HIGH",
+            signals: ["Distress cue detected", "Heightened caution required"],
+            recommendedActions: [
+              "Head directly toward the nearest open, well-lit commercial business",
+              "Trigger Emergency SOS to ping your trusted contacts immediately",
+              "Call 112/911 if in imminent physical danger",
+            ],
+            safeAdvice: data.reply,
+            shouldTriggerSOSPrompt: true,
+          } : undefined,
         };
         setMessages((prev) => [...prev, aiMsg]);
       }
@@ -76,7 +90,7 @@ export function AIChat() {
       const fallbackAiMsg: DistressChatMessage = {
         id: `ai_${Date.now()}`,
         sender: "assistant",
-        message: "Stay calm and keep moving towards illuminated, populated premises. Stay on well-lit main roads.",
+        message: "Stay on illuminated main corridors, keep moving toward active businesses, and tap 'I'm Safe' or trigger SOS if in danger.",
         timestamp: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, fallbackAiMsg]);
@@ -86,7 +100,9 @@ export function AIChat() {
   };
 
   return (
-    <div className="flex flex-col h-[520px] rounded-2xl glass-panel-elevated border border-slate-800 overflow-hidden">
+    <div className="flex flex-col h-[560px] rounded-2xl glass-panel-elevated border border-slate-800 overflow-hidden">
+      
+      {/* Header */}
       <div className="p-3.5 border-b border-slate-800 glass-panel flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400">
@@ -98,28 +114,32 @@ export function AIChat() {
           </div>
         </div>
         <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">
-          ONLINE
+          SAFETY ADVISORY
         </span>
       </div>
 
+      {/* Safety Advisory Disclaimer */}
       <div className="px-3 py-1.5 bg-indigo-950/40 border-b border-indigo-500/20 text-[10px] text-indigo-300 flex items-center gap-1.5">
         <ShieldCheck className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
-        <span>Advisory assistant • Does not replace 911 / 112 emergency services.</span>
+        <span>Advisory assistant • Never guarantees safety • Does not replace 911 / 112 services.</span>
       </div>
 
+      {/* Messages Feed */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        <div className="space-y-1">
+        
+        {/* Quick Safety Queries */}
+        <div className="space-y-1.5">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-            Sample Scenarios:
+            Suggested Safety Questions:
           </span>
-          <div className="flex flex-wrap gap-1">
-            {SAMPLE_DISTRESS_QUERIES.map((q, idx) => (
+          <div className="flex flex-wrap gap-1.5">
+            {QUICK_SAFETY_QUESTIONS.map((q, idx) => (
               <button
                 key={idx}
                 onClick={() => handleSend(q)}
-                className="text-left text-[11px] p-1.5 rounded-lg bg-slate-900 hover:bg-indigo-950/60 border border-slate-800 text-slate-300 transition-colors"
+                className="text-left text-[11px] px-2 py-1.5 rounded-lg bg-slate-900 hover:bg-indigo-950/60 border border-slate-800 text-slate-300 hover:text-indigo-200 transition-colors"
               >
-                &quot;{q}&quot;
+                &ldquo;{q}&rdquo;
               </button>
             ))}
           </div>
@@ -128,26 +148,16 @@ export function AIChat() {
         {messages.map((msg) => (
           <div key={msg.id} className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}>
             <div
-              className={`max-w-[85%] rounded-2xl p-3 text-xs ${
+              className={`max-w-[85%] rounded-2xl p-3.5 text-xs ${
                 msg.sender === "user"
                   ? "bg-indigo-600 text-white rounded-br-none"
-                  : "bg-slate-900 border border-slate-800 text-slate-200 rounded-bl-none"
+                  : "bg-slate-900 border border-slate-800 text-slate-200 rounded-bl-none space-y-2"
               }`}
             >
-              <p className="leading-relaxed">{msg.message}</p>
+              <p className="leading-relaxed whitespace-pre-line">{msg.message}</p>
+              
               {msg.analysis && (
-                <div className="mt-2.5 pt-2.5 border-t border-slate-800 space-y-2">
-                  <div className="flex items-center justify-between text-[10px]">
-                    <span className="font-bold uppercase text-slate-400">Urgency:</span>
-                    <span className={`font-bold px-1.5 py-0.2 rounded ${
-                      msg.analysis.urgency === "IMMEDIATE" || msg.analysis.urgency === "HIGH"
-                        ? "bg-rose-500/20 text-rose-300 border border-rose-500/40"
-                        : "bg-amber-500/20 text-amber-300 border border-amber-500/40"
-                    }`}>
-                      {msg.analysis.urgency}
-                    </span>
-                  </div>
-
+                <div className="mt-2 pt-2 border-t border-slate-800 space-y-2">
                   {msg.analysis.recommendedActions && (
                     <div className="space-y-1">
                       {msg.analysis.recommendedActions.map((a, i) => (
@@ -162,10 +172,10 @@ export function AIChat() {
                   {msg.analysis.shouldTriggerSOSPrompt && (
                     <button
                       onClick={() => triggerSOS("distress_ai_prompt")}
-                      className="w-full py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1 mt-1 shadow-md shadow-rose-600/30"
+                      className="w-full py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 mt-1 shadow-md shadow-rose-600/30 animate-pulse"
                     >
-                      <ShieldAlert className="w-3.5 h-3.5" />
-                      <span>Trigger One-Tap SOS Beacon</span>
+                      <ShieldAlert className="w-4 h-4" />
+                      <span>Trigger Emergency SOS Beacon Now</span>
                     </button>
                   )}
                 </div>
@@ -173,10 +183,12 @@ export function AIChat() {
             </div>
           </div>
         ))}
-        {isTyping && <div className="text-xs text-slate-400 italic">GuardianAI is analyzing safety context...</div>}
+
+        {isTyping && <div className="text-xs text-slate-400 italic">GuardianAI Safety Assistant is analyzing...</div>}
         <div ref={chatEndRef} />
       </div>
 
+      {/* Input Box */}
       <div className="p-3 border-t border-slate-800 glass-panel">
         <form
           onSubmit={(e) => {
@@ -189,18 +201,19 @@ export function AIChat() {
             type="text"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            placeholder="Type your safety question or distress situation..."
-            className="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+            placeholder="Ask about your risk score, or describe your situation..."
+            className="flex-1 px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
           />
           <button
             type="submit"
             disabled={!inputMessage.trim() || isTyping}
-            className="p-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50 transition-colors"
+            className="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50 transition-colors"
           >
             <Send className="w-4 h-4" />
           </button>
         </form>
       </div>
+
     </div>
   );
 }

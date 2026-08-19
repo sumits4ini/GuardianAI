@@ -216,7 +216,7 @@ function calculateHeuristicRisk(
  */
 export async function analyzeDistressWithAI(
   userMessage: string,
-  journeyContext?: Partial<JourneyRiskContext>
+  journeyContext?: { latitude?: number; longitude?: number; destination?: string } | Partial<JourneyRiskContext>
 ): Promise<DistressAnalysisResult> {
   if (genAI) {
     try {

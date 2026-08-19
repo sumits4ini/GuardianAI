@@ -6,17 +6,16 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { DemoControllerBar } from "@/components/demo/demo-controller-bar";
-import { SafetyScore } from "@/components/dashboard/SafetyScore";
+import { AISafetyCard } from "@/components/ai/AISafetyCard";
 import { SafetyStatus } from "@/components/dashboard/SafetyStatus";
 import { JourneyCard } from "@/components/dashboard/JourneyCard";
-import { RiskFactors } from "@/components/dashboard/RiskFactors";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { SOSButton } from "@/components/safety/SOSButton";
 import { CheckInButton } from "@/components/safety/CheckInButton";
 import { SafetyMap } from "@/components/map/SafetyMap";
 import { SOSEmergencyModal } from "@/components/sos/sos-emergency-modal";
 import { useGuardian } from "@/lib/store/demo-context";
-import { Play, Navigation, ShieldCheck, Compass, MapPin } from "lucide-react";
+import { Play, Navigation, ShieldCheck, Compass, MessageSquare } from "lucide-react";
 
 export default function DashboardPage() {
   const {
@@ -92,15 +91,15 @@ export default function DashboardPage() {
           {/* Main Dashboard 2-Column Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            {/* Left Column (5 Cols): Risk Score, Active Journey Card, Risk Signals, SOS Beacon */}
+            {/* Left Column (5 Cols): AI Safety Analysis Card, Active Journey / Starter, SOS Beacon */}
             <div className="lg:col-span-5 space-y-6">
               
-              <SafetyScore
-                score={riskAssessment.riskScore}
-                level={riskAssessment.riskLevel}
-                confidence={riskAssessment.confidence}
+              {/* Core AI Safety Analysis Card with Explainability ("Why?") & Confidence */}
+              <AISafetyCard
+                assessment={riskAssessment}
                 isEvaluating={isEvaluatingRisk}
                 onRefresh={() => evaluateRisk()}
+                onTriggerSOS={() => triggerSOS("manual_hold")}
               />
 
               {activeJourney ? (
@@ -135,20 +134,15 @@ export default function DashboardPage() {
                       <span>Start Journey</span>
                     </Link>
                     <Link
-                      href="/map"
+                      href="/assistant"
                       className="py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold text-xs border border-slate-700 flex items-center justify-center gap-1.5"
                     >
-                      <Navigation className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>Explore Map</span>
+                      <MessageSquare className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>Safety AI Chat</span>
                     </Link>
                   </div>
                 </div>
               )}
-
-              <RiskFactors
-                signals={riskAssessment.signals}
-                reasoning={riskAssessment.reasoning}
-              />
 
               {/* Emergency SOS Beacon Button */}
               <SOSButton />
