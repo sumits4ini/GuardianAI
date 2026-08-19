@@ -23,6 +23,7 @@ export interface AnomalyDetectionResult {
   anomalies: JourneyAnomaly[];
   primaryAnomaly: JourneyAnomaly | null;
   aggregateAnomalyRiskScore: number;
+  anomalyType?: string;
 }
 
 export interface AnomalyDetectionOptions {
@@ -52,8 +53,24 @@ export interface AnomalyDetectionOptions {
  * Progression: ANOMALY -> Explain -> Elevate contextual risk -> Ask for check-in -> Provide SOS.
  */
 export function detectJourneyAnomalies(
-  options: AnomalyDetectionOptions
+  optionsOrJourney: AnomalyDetectionOptions | SafetyJourney | null,
+  legacyCoords?: Coordinates,
+  legacyNowDate?: Date
 ): AnomalyDetectionResult {
+  let options: AnomalyDetectionOptions;
+
+  if (optionsOrJourney && ("status" in optionsOrJourney || "destination" in optionsOrJourney)) {
+    // Positional / legacy signature
+    options = {
+      journey: optionsOrJourney as SafetyJourney,
+      currentCoords: legacyCoords,
+      nowDate: legacyNowDate,
+    };
+  } else {
+    // Options object signature
+    options = (optionsOrJourney as AnomalyDetectionOptions) || { journey: null };
+  }
+
   const {
     journey,
     currentCoords,
@@ -191,10 +208,14 @@ export function detectJourneyAnomalies(
     }
   }
 
+  const primary = anomalies.length > 0 ? anomalies[0] : null;
+  const legacyType = primary?.type === "ROUTE_DEVIATION" ? "CORRIDOR_DEVIATION" : primary?.type;
+
   return {
     hasAnomaly: anomalies.length > 0,
     anomalies,
-    primaryAnomaly: anomalies.length > 0 ? anomalies[0] : null,
+    primaryAnomaly: primary,
     aggregateAnomalyRiskScore: Math.min(60, aggregateRisk),
+    anomalyType: legacyType,
   };
 }
