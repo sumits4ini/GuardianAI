@@ -1,14 +1,18 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Shield, Radio, Sparkles, Users, MapPin, Compass, User } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Shield, Radio, Sparkles, Users, MapPin, Compass, User, LogOut, LogIn } from "lucide-react";
 import { useGuardian } from "@/lib/store/demo-context";
+import { useAuth } from "@/hooks/useAuth";
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { isDemoMode, toggleDemoMode } = useGuardian();
+  const { user, profile, signOut } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const navLinks = [
     { href: "/dashboard", label: "Dashboard" },
@@ -18,9 +22,18 @@ export function Navbar() {
     { href: "/assistant", label: "AI Assistant" },
   ];
 
+  const handleSignOut = async () => {
+    setIsLoggingOut(true);
+    await signOut();
+    setIsLoggingOut(false);
+    router.push("/login");
+  };
+
   return (
     <nav className="sticky top-0 z-40 w-full border-b border-slate-800/80 glass-panel">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        
+        {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-3">
           <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-primary to-cyan-400 p-[1.5px] shadow-lg shadow-indigo-500/20">
             <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
@@ -82,13 +95,37 @@ export function Navbar() {
             <span className="text-[11px] font-medium">Demo Mode</span>
           </button>
 
-          <Link
-            href="/profile"
-            className="p-2 rounded-lg bg-slate-900/80 hover:bg-slate-800 border border-slate-700/80 text-slate-300 transition-colors"
-            title="User Profile & Trusted Contacts"
-          >
-            <User className="w-4 h-4 text-slate-300" />
-          </Link>
+          {user ? (
+            <div className="flex items-center gap-1.5">
+              <Link
+                href="/profile"
+                className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-900/80 hover:bg-slate-800 border border-slate-700/80 text-slate-300 transition-colors"
+                title="User Profile & Trusted Contacts"
+              >
+                <User className="w-3.5 h-3.5 text-indigo-400" />
+                <span className="text-xs font-semibold hidden md:inline truncate max-w-[120px]">
+                  {profile?.fullName || user.fullName || "Alex Rivera"}
+                </span>
+              </Link>
+
+              <button
+                onClick={handleSignOut}
+                disabled={isLoggingOut}
+                className="p-2 rounded-lg bg-slate-900/80 hover:bg-slate-800 border border-slate-700/80 text-slate-400 hover:text-rose-400 transition-colors"
+                title="Sign Out"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-sm transition-colors"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Sign In</span>
+            </Link>
+          )}
         </div>
       </div>
     </nav>

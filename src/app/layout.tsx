@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/lib/auth/auth-context";
 import { GuardianProvider } from "@/lib/store/demo-context";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -27,9 +28,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.className} min-h-screen bg-slate-950 text-slate-100 antialiased`}>
-        <GuardianProvider>
-          {children}
-        </GuardianProvider>
+        <AuthProvider>
+          <GuardianProvider>
+            {children}
+          </GuardianProvider>
+        </AuthProvider>
       </body>
     </html>
   );

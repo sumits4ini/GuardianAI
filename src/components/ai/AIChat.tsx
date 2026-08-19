@@ -119,7 +119,7 @@ export function AIChat() {
                 onClick={() => handleSend(q)}
                 className="text-left text-[11px] p-1.5 rounded-lg bg-slate-900 hover:bg-indigo-950/60 border border-slate-800 text-slate-300 transition-colors"
               >
-                "{q}"
+                &quot;{q}&quot;
               </button>
             ))}
           </div>

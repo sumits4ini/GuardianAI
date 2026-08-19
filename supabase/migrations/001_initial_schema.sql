@@ -7,7 +7,8 @@
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   full_name TEXT NOT NULL,
-  phone TEXT NOT NULL,
+  email TEXT,
+  phone TEXT,
   emergency_notes TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -19,6 +20,32 @@ CREATE POLICY "Users can view and edit own profile"
   ON public.profiles 
   FOR ALL 
   USING (auth.uid() = id);
+
+-- Trigger: Automatically create a profile row upon Supabase Auth signup
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, full_name, email, phone, created_at, updated_at)
+  VALUES (
+    new.id,
+    COALESCE(new.raw_user_meta_data->>'full_name', 'Guardian Traveler'),
+    new.email,
+    COALESCE(new.raw_user_meta_data->>'phone', ''),
+    NOW(),
+    NOW()
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    email = EXCLUDED.email,
+    full_name = COALESCE(EXCLUDED.full_name, public.profiles.full_name),
+    updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- 2. Trusted Contacts Table
 CREATE TABLE IF NOT EXISTS public.trusted_contacts (
@@ -35,9 +62,24 @@ CREATE TABLE IF NOT EXISTS public.trusted_contacts (
 
 ALTER TABLE public.trusted_contacts ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can manage their trusted contacts" 
+CREATE POLICY "Users can view own trusted contacts" 
   ON public.trusted_contacts 
-  FOR ALL 
+  FOR SELECT 
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own trusted contacts" 
+  ON public.trusted_contacts 
+  FOR INSERT 
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own trusted contacts" 
+  ON public.trusted_contacts 
+  FOR UPDATE 
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own trusted contacts" 
+  ON public.trusted_contacts 
+  FOR DELETE 
   USING (auth.uid() = user_id);
 
 -- 3. Safety Sessions (Journeys) Table
@@ -171,3 +213,4 @@ CREATE POLICY "Users can manage their own SOS alerts"
 CREATE INDEX IF NOT EXISTS idx_safety_reports_coords ON public.safety_reports (latitude, longitude);
 CREATE INDEX IF NOT EXISTS idx_location_events_session ON public.location_events (session_id);
 CREATE INDEX IF NOT EXISTS idx_safety_sessions_user ON public.safety_sessions (user_id);
+CREATE INDEX IF NOT EXISTS idx_trusted_contacts_user ON public.trusted_contacts (user_id);

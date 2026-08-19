@@ -1,33 +1,53 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Shield, ArrowRight, Lock, Mail, User, Phone } from "lucide-react";
+import { Shield, ArrowRight, Lock, Mail, User, Phone, AlertCircle } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
-import { useGuardian } from "@/lib/store/demo-context";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function SignupPage() {
   const router = useRouter();
-  const { updateUserProfile } = useGuardian();
-  
+  const { signUp, error, clearError } = useAuth();
+
   const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [localError, setLocalError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const handleSignup = (e: React.FormEvent) => {
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
+
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    updateUserProfile({
-      fullName: fullName || "Alex Rivera",
-      phone: phone || "+1 (555) 439-8821",
-      email: email || "alex@example.com",
-    });
-    setTimeout(() => {
+    setLocalError(null);
+
+    if (!fullName.trim() || fullName.trim().length < 2) {
+      setLocalError("Please provide your full name (at least 2 characters).");
+      return;
+    }
+    if (!email || !email.includes("@")) {
+      setLocalError("Please provide a valid email address.");
+      return;
+    }
+    if (!password || password.length < 6) {
+      setLocalError("Password must be at least 6 characters long.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    const res = await signUp(fullName.trim(), email.trim(), password, phone.trim());
+    setIsSubmitting(false);
+
+    if (res.success) {
       router.push("/dashboard");
-    }, 600);
+    } else if (res.error) {
+      setLocalError(res.error);
+    }
   };
 
   return (
@@ -36,15 +56,23 @@ export default function SignupPage() {
 
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl glass-panel-elevated border border-slate-800 space-y-6 shadow-2xl">
+          
           <div className="text-center space-y-2">
             <div className="inline-flex p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 mb-2">
               <Shield className="w-8 h-8" />
             </div>
-            <h1 className="text-2xl font-extrabold text-white">Create Safety Net</h1>
-            <p className="text-xs text-slate-400">Join GuardianAI predictive safety intelligence</p>
+            <h1 className="text-2xl font-extrabold text-white">Create Safety Account</h1>
+            <p className="text-xs text-slate-400">Initialize your proactive safety corridor net</p>
           </div>
 
-          <form onSubmit={handleSignup} className="space-y-3">
+          {(localError || error) && (
+            <div className="p-3.5 rounded-xl bg-rose-950/50 border border-rose-500/40 text-xs text-rose-300 flex items-start gap-2 animate-in fade-in">
+              <AlertCircle className="w-4 h-4 text-rose-400 mt-0.5 flex-shrink-0" />
+              <span>{localError || error}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSignup} className="space-y-3.5">
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1">Full Name</label>
               <div className="relative">
@@ -57,21 +85,6 @@ export default function SignupPage() {
                   className="w-full px-3 py-2 pl-9 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
                 />
                 <User className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Phone Number</label>
-              <div className="relative">
-                <input
-                  type="tel"
-                  placeholder="+1 (555) 000-0000"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  required
-                  className="w-full px-3 py-2 pl-9 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                />
-                <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
               </div>
             </div>
 
@@ -91,14 +104,29 @@ export default function SignupPage() {
             </div>
 
             <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Phone Number (Optional)</label>
+              <div className="relative">
+                <input
+                  type="tel"
+                  placeholder="+1 (555) 439-8821"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full px-3 py-2 pl-9 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                />
+                <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+              </div>
+            </div>
+
+            <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1">Password</label>
               <div className="relative">
                 <input
                   type="password"
-                  placeholder="••••••••••••"
+                  placeholder="At least 6 characters"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  minLength={6}
                   className="w-full px-3 py-2 pl-9 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
                 />
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -107,10 +135,10 @@ export default function SignupPage() {
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-primary hover:from-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 transition-all mt-3"
+              disabled={isSubmitting}
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-primary hover:from-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 transition-all mt-3 disabled:opacity-50"
             >
-              <span>{loading ? "Creating Account..." : "Create Account & Go to Dashboard"}</span>
+              <span>{isSubmitting ? "Creating Safety Net..." : "Create Account & Go to Dashboard"}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
@@ -121,6 +149,7 @@ export default function SignupPage() {
               Sign in
             </Link>
           </div>
+
         </div>
       </div>
     </div>

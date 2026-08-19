@@ -159,7 +159,7 @@ export function DistressChatSheet({ isOpen, onClose }: DistressChatSheetProps) {
                   onClick={() => handleSendMessage(query)}
                   className="text-left text-[11px] p-2 rounded-lg bg-slate-900 hover:bg-indigo-950/60 border border-slate-800 hover:border-indigo-500/40 text-slate-300 hover:text-indigo-200 transition-colors"
                 >
-                  "{query}"
+                  &quot;{query}&quot;
                 </button>
               ))}
             </div>

@@ -1,23 +1,56 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Shield, Sparkles, ArrowRight, Lock, Mail } from "lucide-react";
+import { Shield, ArrowRight, Lock, Mail, AlertCircle, Sparkles } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("alex.rivera@guardian.safe");
-  const [password, setPassword] = useState("••••••••••••");
-  const [loading, setLoading] = useState(false);
+  const { signIn, user, loading, error, clearError } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const [email, setEmail] = useState("alex.rivera@guardian.safe");
+  const [password, setPassword] = useState("securepassword123");
+  const [localError, setLocalError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
+    setLocalError(null);
+
+    if (!email || !email.includes("@")) {
+      setLocalError("Please provide a valid email address.");
+      return;
+    }
+    if (!password || password.length < 6) {
+      setLocalError("Password must be at least 6 characters.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    const res = await signIn(email, password);
+    setIsSubmitting(false);
+
+    if (res.success) {
       router.push("/dashboard");
-    }, 600);
+    } else if (res.error) {
+      setLocalError(res.error);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    setIsSubmitting(true);
+    const res = await signIn("alex.rivera@guardian.safe", "securepassword123");
+    setIsSubmitting(false);
+    if (res.success) {
+      router.push("/dashboard");
+    }
   };
 
   return (
@@ -26,13 +59,21 @@ export default function LoginPage() {
 
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl glass-panel-elevated border border-slate-800 space-y-6 shadow-2xl">
+          
           <div className="text-center space-y-2">
             <div className="inline-flex p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 mb-2">
               <Shield className="w-8 h-8" />
             </div>
-            <h1 className="text-2xl font-extrabold text-white">Welcome Back</h1>
-            <p className="text-xs text-slate-400">Sign in to your GuardianAI Safety Net account</p>
+            <h1 className="text-2xl font-extrabold text-white">Sign In to Safety Net</h1>
+            <p className="text-xs text-slate-400">Access your journey monitor, trusted network & AI assistant</p>
           </div>
+
+          {(localError || error) && (
+            <div className="p-3.5 rounded-xl bg-rose-950/50 border border-rose-500/40 text-xs text-rose-300 flex items-start gap-2 animate-in fade-in">
+              <AlertCircle className="w-4 h-4 text-rose-400 mt-0.5 flex-shrink-0" />
+              <span>{localError || error}</span>
+            </div>
+          )}
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
@@ -43,6 +84,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  placeholder="name@example.com"
                   className="w-full px-3 py-2.5 pl-9 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
                 />
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
@@ -57,6 +99,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  placeholder="••••••••••••"
                   className="w-full px-3 py-2.5 pl-9 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
                 />
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
@@ -65,20 +108,33 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-primary hover:from-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 transition-all mt-2"
+              disabled={isSubmitting}
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-primary hover:from-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 transition-all mt-2 disabled:opacity-50"
             >
-              <span>{loading ? "Authenticating..." : "Sign In to Dashboard"}</span>
+              <span>{isSubmitting ? "Authenticating..." : "Sign In to Dashboard"}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
+          {/* Quick Demo Access */}
+          <div className="pt-2">
+            <button
+              type="button"
+              onClick={handleDemoLogin}
+              className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-indigo-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              <span>1-Click Hackathon Evaluator Login</span>
+            </button>
+          </div>
+
           <div className="text-center pt-2 text-xs text-slate-400">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/signup" className="text-indigo-400 hover:text-indigo-300 font-semibold">
-              Create one here
+              Sign up here
             </Link>
           </div>
+
         </div>
       </div>
     </div>

@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { PRESET_JOURNEYS } from "@/lib/store/mock-data";
 import { Coordinates } from "@/types";
-import { MapPin, Navigation, Compass, ShieldCheck } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { MapPin, Navigation, Compass, ShieldCheck, AlertTriangle, UserPlus } from "lucide-react";
 
 interface JourneyFormProps {
   currentCoords: Coordinates;
@@ -18,6 +20,8 @@ interface JourneyFormProps {
 }
 
 export function JourneyForm({ currentCoords, onSubmit }: JourneyFormProps) {
+  const { trustedContacts } = useAuth();
+
   const [originName, setOriginName] = useState("Current Location (Campus Quad)");
   const [destName, setDestName] = useState("North Student Hostel Complex");
   const [destLat, setDestLat] = useState(37.7792);
@@ -51,6 +55,28 @@ export function JourneyForm({ currentCoords, onSubmit }: JourneyFormProps) {
 
   return (
     <div className="space-y-4">
+      {/* Zero Contacts Recommendation Banner */}
+      {trustedContacts.length === 0 && (
+        <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-500/40 text-xs text-amber-300 flex items-start justify-between gap-2">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <span className="font-bold block">Recommended Safety Step</span>
+              <span className="text-[11px] text-amber-200/80">
+                You currently have 0 trusted contacts. Add at least one contact so they can receive automated high-risk or SOS alerts.
+              </span>
+            </div>
+          </div>
+          <Link
+            href="/profile"
+            className="text-[11px] font-bold px-2 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 rounded border border-amber-500/40 whitespace-nowrap"
+          >
+            Add Contact
+          </Link>
+        </div>
+      )}
+
+      {/* Preset Routes */}
       <div className="space-y-2">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">
           Preset Routes
@@ -76,6 +102,7 @@ export function JourneyForm({ currentCoords, onSubmit }: JourneyFormProps) {
         </div>
       </div>
 
+      {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
           <label className="block text-xs font-medium text-slate-300 mb-1">Origin Point</label>

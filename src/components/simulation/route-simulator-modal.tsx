@@ -33,6 +33,7 @@ export function RouteSimulatorModal({ isOpen, onClose }: RouteSimulatorModalProp
     if (isOpen) {
       fetchRouteComparison();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const fetchRouteComparison = async () => {
