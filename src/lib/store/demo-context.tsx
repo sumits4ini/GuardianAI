@@ -55,6 +55,7 @@ interface GuardianContextType {
   removeTrustedContact: (id: string) => void;
   evaluateRisk: (customCoords?: Coordinates, deviation?: boolean) => Promise<void>;
   setDemoScenario: (scenarioKey: string) => Promise<void>;
+  resetDemoState: () => Promise<void>;
   toggleDemoMode: (enabled?: boolean) => void;
   setCurrentCoords: (coords: Coordinates) => void;
 }
@@ -605,6 +606,17 @@ export function GuardianProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const resetDemoState = async () => {
+    setActiveDemoScenario("safe_commute");
+    setSosActive(false);
+    setSosAlert(null);
+    setLastCheckInConfirmation(null);
+    setActiveJourney(null);
+    setCurrentCoordsState(DEFAULT_CENTER);
+    setCommunityReports(INITIAL_COMMUNITY_REPORTS);
+    setRiskAssessment(defaultInitialRisk);
+  };
+
   const toggleDemoMode = (enabled?: boolean) => {
     setIsDemoMode((prev) => enabled !== undefined ? enabled : !prev);
   };
@@ -641,6 +653,7 @@ export function GuardianProvider({ children }: { children: React.ReactNode }) {
         removeTrustedContact,
         evaluateRisk,
         setDemoScenario,
+        resetDemoState,
         toggleDemoMode,
         setCurrentCoords,
       }}

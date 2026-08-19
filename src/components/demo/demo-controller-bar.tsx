@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useGuardian } from "@/lib/store/demo-context";
 import { 
   Play, 
@@ -10,7 +10,9 @@ import {
   Clock, 
   ShieldAlert,
   Sparkles,
-  Info
+  RotateCcw,
+  Activity,
+  Layers
 } from "lucide-react";
 
 export function DemoControllerBar() {
@@ -20,68 +22,46 @@ export function DemoControllerBar() {
     setDemoScenario, 
     triggerSOS, 
     activeJourney,
-    startJourney 
+    startJourney,
+    evaluateRisk,
+    resetDemoState,
   } = useGuardian();
+
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   if (!isDemoMode) return null;
 
-  const scenarios = [
-    {
-      id: "safe_commute",
-      label: "1. Normal Safe Journey",
-      desc: "Baseline transit on lit path (Score: ~14)",
-      icon: <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />,
-      color: "hover:border-emerald-500/50",
-    },
-    {
-      id: "hotspot_proximity",
-      label: "2. Approaching Hotspot",
-      desc: "Clustering 2 recent harassment reports (Score: ~56)",
-      icon: <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />,
-      color: "hover:border-amber-500/50",
-    },
-    {
-      id: "route_deviation",
-      label: "3. Route Deviation Anomaly",
-      desc: "Detour into unlit warehouse lane (Score: ~78)",
-      icon: <Navigation className="w-3.5 h-3.5 text-orange-400" />,
-      color: "hover:border-orange-500/50",
-    },
-    {
-      id: "missed_checkin",
-      label: "4. Overdue Check-in",
-      desc: "Missed scheduled safety timer (Score: ~88)",
-      icon: <Clock className="w-3.5 h-3.5 text-rose-400" />,
-      color: "hover:border-rose-500/50",
-    },
-  ];
+  const handleRunAnalysis = async () => {
+    setIsAnalyzing(true);
+    await evaluateRisk();
+    setIsAnalyzing(false);
+  };
 
   return (
-    <div className="w-full bg-indigo-950/70 border-b border-indigo-500/30 px-4 py-2.5 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+    <div className="w-full bg-slate-950 border-b border-indigo-500/30 px-3 py-2 backdrop-blur-md sticky top-16 z-40">
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2.5">
         
-        {/* Title */}
+        {/* Title & Demo Tag */}
         <div className="flex items-center gap-2">
-          <div className="p-1 rounded-md bg-indigo-500/20 text-indigo-300">
-            <Sparkles className="w-4 h-4" />
+          <div className="p-1 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">
+            <Sparkles className="w-3.5 h-3.5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-white uppercase tracking-wider">
-                Hackathon Demo Simulation Mode
+              <span className="text-xs font-black text-white uppercase tracking-wider">
+                HACKATHON DEMO CONTROLLER
               </span>
-              <span className="text-[10px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.2 rounded border border-indigo-500/30">
-                JUDGES QUICK-TEST
+              <span className="text-[9px] font-extrabold bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-500/30">
+                1-CLICK SIMULATIONS
               </span>
             </div>
-            <p className="text-[10px] text-slate-400">
-              Click scenarios to test live AI reasoning and anomaly triggers in real-time
-            </p>
           </div>
         </div>
 
-        {/* Action Chips */}
-        <div className="flex flex-wrap items-center gap-1.5 w-full md:w-auto">
+        {/* Action Buttons Grid */}
+        <div className="flex flex-wrap items-center gap-1.5 w-full lg:w-auto">
+          
+          {/* Start Journey */}
           {!activeJourney && (
             <button
               onClick={() => {
@@ -94,40 +74,97 @@ export function DemoControllerBar() {
                   10
                 );
               }}
-              className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition-all"
+              className="flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition-all"
             >
               <Play className="w-3 h-3 fill-current" />
               <span>Start Journey</span>
             </button>
           )}
 
-          {scenarios.map((sc) => {
-            const isActive = activeDemoScenario === sc.id;
-            return (
-              <button
-                key={sc.id}
-                onClick={() => setDemoScenario(sc.id)}
-                title={sc.desc}
-                className={`flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1.5 rounded-lg border transition-all ${
-                  isActive
-                    ? "bg-indigo-600 border-indigo-400 text-white shadow-md shadow-indigo-600/30 font-bold"
-                    : `bg-slate-900/90 border-slate-700 text-slate-300 ${sc.color}`
-                }`}
-              >
-                {sc.icon}
-                <span>{sc.label}</span>
-              </button>
-            );
-          })}
-
+          {/* 1. Normal Safe Journey */}
           <button
-            onClick={() => triggerSOS("demo_sos_click")}
-            className="flex items-center gap-1 text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-rose-600/80 hover:bg-rose-600 text-white border border-rose-500/40 shadow-sm transition-all"
-            title="Simulate Instant Emergency SOS Dispatch"
+            onClick={() => setDemoScenario("safe_commute")}
+            className={`flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg border transition-all ${
+              activeDemoScenario === "safe_commute"
+                ? "bg-emerald-600 border-emerald-400 text-white font-bold"
+                : "bg-slate-900 border-slate-700 text-slate-300 hover:border-emerald-500/50"
+            }`}
           >
-            <ShieldAlert className="w-3.5 h-3.5" />
-            <span>Test SOS</span>
+            <ShieldCheck className="w-3 h-3 text-emerald-400" />
+            <span>Safe Corridor</span>
           </button>
+
+          {/* 2. High-Risk Area / Approaching Hotspot */}
+          <button
+            onClick={() => setDemoScenario("hotspot_proximity")}
+            className={`flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg border transition-all ${
+              activeDemoScenario === "hotspot_proximity"
+                ? "bg-amber-600 border-amber-400 text-white font-bold"
+                : "bg-slate-900 border-slate-700 text-slate-300 hover:border-amber-500/50"
+            }`}
+          >
+            <AlertTriangle className="w-3 h-3 text-amber-400" />
+            <span>High-Risk Area</span>
+          </button>
+
+          {/* 3. Route Deviation */}
+          <button
+            onClick={() => setDemoScenario("route_deviation")}
+            className={`flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg border transition-all ${
+              activeDemoScenario === "route_deviation"
+                ? "bg-orange-600 border-orange-400 text-white font-bold"
+                : "bg-slate-900 border-slate-700 text-slate-300 hover:border-orange-500/50"
+            }`}
+          >
+            <Navigation className="w-3 h-3 text-orange-400" />
+            <span>Route Detour</span>
+          </button>
+
+          {/* 4. Missed Check-in */}
+          <button
+            onClick={() => setDemoScenario("missed_checkin")}
+            className={`flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg border transition-all ${
+              activeDemoScenario === "missed_checkin"
+                ? "bg-rose-600 border-rose-400 text-white font-bold"
+                : "bg-slate-900 border-slate-700 text-slate-300 hover:border-rose-500/50"
+            }`}
+          >
+            <Clock className="w-3 h-3 text-rose-400" />
+            <span>Missed Check-in</span>
+          </button>
+
+          {/* 5. Run AI Risk Analysis */}
+          <button
+            onClick={handleRunAnalysis}
+            disabled={isAnalyzing}
+            className="flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-400/40 shadow-sm transition-all disabled:opacity-50"
+          >
+            <Activity className={`w-3 h-3 ${isAnalyzing ? "animate-spin" : ""}`} />
+            <span>{isAnalyzing ? "Analyzing..." : "Analyze Risk"}</span>
+          </button>
+
+          {/* 6. Trigger Demo SOS */}
+          <button
+            onClick={() => triggerSOS("demo_controller_click")}
+            className="flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white border border-rose-400 shadow-sm transition-all"
+          >
+            <ShieldAlert className="w-3 h-3" />
+            <span>Trigger SOS</span>
+          </button>
+
+          {/* 7. Reset Demo */}
+          <button
+            onClick={() => {
+              if (resetDemoState) resetDemoState();
+              else setDemoScenario("safe_commute");
+            }}
+            className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all"
+            title="Reset to pristine state"
+          >
+            <RotateCcw className="w-3 h-3 text-slate-400" />
+            <span>Reset</span>
+          </button>
+
         </div>
 
       </div>
