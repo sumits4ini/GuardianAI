@@ -244,40 +244,74 @@ Return ONLY raw JSON without markdown.`;
     }
   }
 
-  // Heuristic Distress Classifier
+  // Heuristic Distress Classifier (Phase 4 Multi-Scenario Safety Reasoning)
   const lower = userMessage.toLowerCase();
-  const isHighDanger = /follow|chase|threat|attack|hurt|danger|weapon|grabbed|scared|emergency|help me/i.test(lower);
-  const isModerate = /dark|lost|uncomfortable|strange|weird|car broke|stopped|creepy/i.test(lower);
+  const isPursuitDanger = /follow|chase|stalk|pursu|threat|attack|hurt|danger|weapon|grabbed|scared|help me/i.test(lower);
+  const isLostOrDisoriented = /lost|disorient|wrong turn|don't know where|trapped|stuck/i.test(lower);
+  const isAreaUnsafe = /area|neighborhood|dark|deserted|shady|creepy|suspicious|abandoned/i.test(lower);
+  const isFriendConcern = /friend|haven't reached|not home|missing|late|where is|hasn't arrived/i.test(lower);
+  const isGeneralUnsafe = /don't feel safe|uncomfortable|anxious|nervous|afraid|bad vibe/i.test(lower);
 
-  if (isHighDanger) {
+  if (isPursuitDanger) {
     return {
       riskLevel: "CRITICAL",
       urgency: "IMMEDIATE",
-      signals: ["Direct expression of physical threat or pursuit", "High stress distress cues"],
+      signals: ["Direct expression of physical pursuit or active threat", "Critical personal safety alert"],
       recommendedActions: [
-        "Move into the nearest open commercial store, lobby, or crowded space",
-        "Trigger one-tap SOS to broadcast live location to trusted contacts",
-        "If in immediate physical danger, dial local emergency services (112/911)"
+        "Move immediately into the nearest open commercial store, crowded restaurant, or lobby",
+        "Trigger one-tap SOS to broadcast live location coordinates to your trusted contacts",
+        "If in imminent physical danger, connect directly with local emergency services (112 / 911)"
       ],
-      safeAdvice: "Stay in well-lit areas, keep moving toward people, and avoid dead-end paths. We are ready to alert your contacts.",
+      safeAdvice: "Do not stop or isolate yourself. Walk briskly toward well-lit public places with people around. We are ready to alert your emergency network.",
       shouldTriggerSOSPrompt: true,
-      nearestActionGuide: "Identify nearest illuminated business or populated transit station.",
+      nearestActionGuide: "Identify nearest illuminated storefront or populated transit station.",
     };
   }
 
-  if (isModerate) {
+  if (isLostOrDisoriented) {
+    return {
+      riskLevel: "HIGH",
+      urgency: "HIGH",
+      signals: ["Disorientation along transit route", "Need for immediate route correction"],
+      recommendedActions: [
+        "Stop in a well-lit location and orient using the GuardianAI live map",
+        "Send a status check-in to your primary trusted contact with your coordinates",
+        "Avoid cutting through dark alleys or unlit paths"
+      ],
+      safeAdvice: "Take a calm breath. Move to the closest well-lit corner or open store and check the safety map corridor to navigate back to main avenues.",
+      shouldTriggerSOSPrompt: false,
+      nearestActionGuide: "Head toward nearest main roadway with active streetlights.",
+    };
+  }
+
+  if (isFriendConcern) {
     return {
       riskLevel: "MODERATE",
       urgency: "MODERATE",
-      signals: ["Unsettling surroundings or disorientation", "Preventative safety check"],
+      signals: ["Third-party safety check query", "Delayed arrival inquiry"],
       recommendedActions: [
-        "Confirm your location on the GuardianAI live map",
-        "Share a live check-in with your primary trusted contact",
-        "Remain on well-illuminated primary roadways"
+        "Check their live journey status on the GuardianAI trusted contacts network",
+        "Send a direct safety ping or voice call",
+        "If unresponsive and past curfew, contact mutual friends or campus security"
       ],
-      safeAdvice: "Take a calm assessment of your surroundings. Stay on main roads and check in with your sister or roommate.",
+      safeAdvice: "Send a quick check-in ping. If your friend has GuardianAI active, their corridor status and last check-in timestamp will confirm their safety.",
       shouldTriggerSOSPrompt: false,
-      nearestActionGuide: "Proceed along main arterial avenues with active streetlights.",
+    };
+  }
+
+  if (isAreaUnsafe || isGeneralUnsafe) {
+    return {
+      riskLevel: "HIGH",
+      urgency: "HIGH",
+      signals: ["Heightened environmental discomfort", "Unsafe area perception"],
+      recommendedActions: [
+        "Switch to well-traveled primary streets with active businesses",
+        "Send a quick safety check-in to your trusted network",
+        "Keep your device in hand with SOS beacon ready"
+      ],
+      safeAdvice: "Trust your instincts. Move toward wider, brighter avenues with active foot traffic and share your location link with a contact.",
+      shouldTriggerSOSPrompt: true,
+      nearestActionGuide: "Proceed along main arterial avenues with working streetlamps.",
     };
   }
 
@@ -287,9 +321,9 @@ Return ONLY raw JSON without markdown.`;
     signals: ["Standard safety query"],
     recommendedActions: [
       "Keep journey tracking active until arrival",
-      "Ensure phone has sufficient battery"
+      "Ensure device battery remains charged"
     ],
-    safeAdvice: "You are on track. Let us know if you observe anything unusual along your route.",
+    safeAdvice: "You are on track. Let us know if you observe any unusual safety conditions along your route.",
     shouldTriggerSOSPrompt: false,
   };
 }

@@ -2,8 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { RiskAssessment, RiskLevel, EscalationLevel, CommunityReport, Coordinates, SafetyJourney } from "@/types";
 import { SYSTEM_PROMPTS } from "./prompts";
 import { validateAIRiskAssessment } from "./validators";
-import { extractSafetySignals, SafetySignalContext } from "./safety-signals";
-import { detectJourneyAnomalies } from "./anomaly-engine";
+import { detectJourneyAnomalies, JourneyAnomaly } from "./anomaly-engine";
 import { getRiskLevelFromScore } from "@/lib/utils";
 
 const apiKey = process.env.GEMINI_API_KEY;
@@ -14,6 +13,9 @@ export interface StructuredSafetyContext {
   checkInStatus?: "RECENT" | "PENDING" | "OVERDUE";
   arrivalStatus?: "ON_TIME" | "OVERDUE";
   routeDeviationDetected?: boolean;
+  isStationary?: boolean;
+  stationaryDurationMins?: number;
+  anomalies?: JourneyAnomaly[];
   nearbyRisk?: number;
   recentReportsCount?: number;
   nearbyReports?: Array<{ category: string; severity: string; approximateLocationName?: string }>;
@@ -23,32 +25,46 @@ export interface StructuredSafetyContext {
 }
 
 /**
+ * Returns exact contextual recommendation matching the risk level tier.
+ */
+export function getContextualRecommendation(riskScore: number): string {
+  if (riskScore <= 25) {
+    return "Continue your journey normally.";
+  } else if (riskScore <= 50) {
+    return "Consider checking your route and staying connected.";
+  } else if (riskScore <= 75) {
+    return "Check in with a trusted contact.";
+  } else {
+    return "If you believe you are in immediate danger, activate SOS and contact appropriate emergency services.";
+  }
+}
+
+/**
  * ============================================================================
- * DETERMINISTIC BASELINE SAFETY SCORING ENGINE
+ * DETERMINISTIC BASELINE SAFETY SCORING ENGINE (Phase 4 Advanced)
  * ============================================================================
  *
  * Scoring Formula & Risk Level Tiers:
- * - 0–25:  SAFE
- * - 26–50: MODERATE
- * - 51–75: HIGH
- * - 76–100: CRITICAL
+ * - 0–25:  SAFE       -> "Continue your journey normally."
+ * - 26–50: MODERATE   -> "Consider checking your route and staying connected."
+ * - 51–75: HIGH       -> "Check in with a trusted contact."
+ * - 76–100: CRITICAL  -> "If you believe you are in immediate danger, activate SOS..."
  *
- * Factors & Additive Weights:
+ * Additive Factors:
  * 1. Base Score: 10 (ambient baseline)
- * 2. Temporal Vulnerability (travelHour):
- *    - Late night (23:00 – 04:00): +22
- *    - Evening/Early morning (20:00 – 22:59, 05:00 – 06:59): +12
+ * 2. Temporal Vulnerability:
+ *    - Late night (23:00 - 04:00): +22
+ *    - Evening/Dawn (20:00 - 22:59, 05:00 - 06:59): +12
  *    - Daytime: +0
  * 3. Journey Overdue Arrival: +25
- * 4. Check-In Overdue: +24
+ * 4. Check-in Overdue: +24
  * 5. Route Deviation Anomaly: +28
- * 6. Nearby Community Hazard Incidents (within 1.5km):
- *    - CRITICAL incident: +22 per report
- *    - HIGH incident:     +15 per report
- *    - MODERATE incident: +8 per report
- * 7. Active SOS Beacon: +50 (automatic CRITICAL escalation)
- *
- * All inputs are validated; no data is fabricated.
+ * 6. Unexpected Stationary Pause: +18
+ * 7. Nearby Community Incidents (1.5km radius):
+ *    - CRITICAL: +22 each
+ *    - HIGH:     +15 each
+ *    - MODERATE: +8 each
+ * 8. SOS Active: +50 (automatic CRITICAL escalation)
  */
 export function calculateBaselineSafetyRisk(context: StructuredSafetyContext): RiskAssessment {
   let score = 10;
@@ -59,10 +75,10 @@ export function calculateBaselineSafetyRisk(context: StructuredSafetyContext): R
   // 1. SOS Beacon Status
   if (context.sosActive) {
     score += 50;
-    signals.push("Emergency SOS broadcast is active");
+    signals.push("Emergency SOS broadcast is currently active");
   }
 
-  // 2. Temporal Window
+  // 2. Temporal Factor
   if (hour >= 23 || hour <= 4) {
     score += 22;
     signals.push(`Late night travel window (${hour}:00) with reduced ambient foot traffic`);
@@ -73,13 +89,13 @@ export function calculateBaselineSafetyRisk(context: StructuredSafetyContext): R
     signals.push("Daytime transit window with standard baseline visibility");
   }
 
-  // 3. Journey Arrival Timeliness
+  // 3. Journey Overdue Arrival
   if (context.arrivalStatus === "OVERDUE") {
     score += 25;
     signals.push("Expected arrival time exceeded without destination check-in");
   }
 
-  // 4. Scheduled Check-In Status
+  // 4. Check-In Overdue
   if (context.checkInStatus === "OVERDUE") {
     score += 24;
     signals.push("Scheduled corridor safety check-in is overdue");
@@ -88,10 +104,25 @@ export function calculateBaselineSafetyRisk(context: StructuredSafetyContext): R
   // 5. Route Deviation
   if (context.routeDeviationDetected) {
     score += 28;
-    signals.push("Unexpected route deviation observed from designated corridor");
+    signals.push("Unexpected route deviation observed from planned corridor");
   }
 
-  // 6. Nearby Community Incidents
+  // 6. Unexpected Stationary Pause
+  if (context.isStationary && (context.stationaryDurationMins || 0) >= 5) {
+    score += 18;
+    signals.push(`Unscheduled stationary pause detected (${context.stationaryDurationMins} mins en route)`);
+  }
+
+  // 7. Detected Anomalies List
+  if (context.anomalies && context.anomalies.length > 0) {
+    context.anomalies.forEach((a) => {
+      if (!signals.some((s) => s.toLowerCase().includes(a.title.toLowerCase()))) {
+        signals.push(`${a.title}: ${a.description}`);
+      }
+    });
+  }
+
+  // 8. Nearby Community Hazards
   if (context.nearbyReports && context.nearbyReports.length > 0) {
     let severeCount = 0;
     let modCount = 0;
@@ -123,26 +154,22 @@ export function calculateBaselineSafetyRisk(context: StructuredSafetyContext): R
   // Clamp score strictly between 5 and 98
   const finalScore = Math.min(98, Math.max(5, score));
   const riskLevel: RiskLevel = getRiskLevelFromScore(finalScore);
+  const recommendedAction = getContextualRecommendation(finalScore);
 
   let reasoning = "";
-  let recommendedAction = "";
   let escalationLevel: EscalationLevel = "NONE";
 
   if (riskLevel === "SAFE") {
     reasoning = "Normal travel conditions within expected corridor with minimal environmental hazards.";
-    recommendedAction = "Maintain standard awareness and complete scheduled check-ins.";
     escalationLevel = "NONE";
   } else if (riskLevel === "MODERATE") {
     reasoning = "Moderate contextual risk due to time of day or proximity to reported area incidents.";
-    recommendedAction = "Stay on illuminated main corridors and keep battery charged.";
     escalationLevel = "LOW";
   } else if (riskLevel === "HIGH") {
     reasoning = "Elevated risk signals detected: overdue travel window or cluster of severe nearby incidents.";
-    recommendedAction = "Check in with a trusted contact and stay in populated areas.";
     escalationLevel = "MEDIUM";
   } else {
-    reasoning = "Critical safety anomaly: route detour or overdue check-in near active high-hazard zones.";
-    recommendedAction = "Perform an immediate safety check-in or prepare one-tap SOS.";
+    reasoning = "Critical safety anomaly: route detour, overdue check-in, or severe nearby hazard alert.";
     escalationLevel = "HIGH";
   }
 
@@ -162,12 +189,6 @@ export function calculateBaselineSafetyRisk(context: StructuredSafetyContext): R
  * ============================================================================
  * HYBRID AI RISK EVALUATOR (GEMINI 1.5 + DETERMINISTIC FALLBACK)
  * ============================================================================
- *
- * 1. Formulates structured, privacy-safe context (ZERO PII).
- * 2. Calls Google Gemini 1.5 Flash.
- * 3. Validates output strictly with Zod schema.
- * 4. If Gemini fails, times out, is unconfigured, or returns invalid schema:
- *    Seamlessly returns baseline risk with aiAvailable = false.
  */
 export async function evaluateRiskWithGemini(
   context: StructuredSafetyContext
@@ -184,9 +205,12 @@ export async function evaluateRiskWithGemini(
         checkInStatus: context.checkInStatus || "PENDING",
         arrivalStatus: context.arrivalStatus || "ON_TIME",
         routeDeviationDetected: !!context.routeDeviationDetected,
+        isStationary: !!context.isStationary,
+        stationaryDurationMins: context.stationaryDurationMins || 0,
         travelHour: context.travelHour !== undefined ? context.travelHour : new Date().getHours(),
         nearbyReportsCount: context.recentReportsCount || context.nearbyReports?.length || 0,
         nearbyIncidents: context.nearbyReports?.slice(0, 5) || [],
+        detectedAnomalies: context.anomalies?.map((a) => a.title) || [],
         userNotes: context.userNotes || undefined,
         baselineCalculatedScore: baseline.riskScore,
       };
@@ -201,16 +225,19 @@ ${JSON.stringify(promptContext, null, 2)}`;
       const cleanJson = text.replace(/^```json\s*/i, "").replace(/\s*```$/i, "").trim();
       const parsed = JSON.parse(cleanJson);
 
-      // Validate output
+      // Validate output schema
       const validated = validateAIRiskAssessment(parsed);
       if (validated) {
+        // Enforce exact contextual recommendation for consistency
+        const contextualRec = validated.recommendedAction || getContextualRecommendation(validated.riskScore);
+
         return {
           riskScore: validated.riskScore,
           riskLevel: validated.riskLevel,
           confidence: validated.confidence,
           signals: validated.signals,
           reasoning: validated.reasoning,
-          recommendedAction: validated.recommendedAction,
+          recommendedAction: contextualRec,
           escalationLevel: validated.escalationLevel,
           evaluatedAt: new Date().toISOString(),
           aiAvailable: true,

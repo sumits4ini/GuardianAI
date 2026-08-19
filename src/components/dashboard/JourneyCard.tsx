@@ -123,6 +123,21 @@ export function JourneyCard({
         </div>
       </div>
 
+      {/* Route Deviation Anomaly Banner */}
+      {journey.routeDeviationDetected && (
+        <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-500/50 space-y-1.5 animate-pulse">
+          <div className="flex items-start gap-2 text-xs text-rose-200">
+            <AlertTriangle className="w-4 h-4 text-rose-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <span className="font-bold block">Route Deviation Anomaly Detected</span>
+              <span className="text-[11px] text-rose-300/90">
+                Movement diverged from your planned travel corridor. Tap below to confirm you are safe.
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Overdue Warning Alert Box */}
       {isAttentionRequired && (
         <div className="p-3 rounded-xl bg-amber-950/60 border border-amber-500/50 space-y-2 animate-in fade-in">
