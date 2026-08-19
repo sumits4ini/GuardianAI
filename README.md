@@ -116,18 +116,6 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 🎬 3-Minute Hackathon Demo Script
-
-For judges and evaluators, GuardianAI includes an interactive **Demo Simulation Bar** at the top of the screen:
-
-1. **Step 1 — Start Journey**: Click **"Start Journey"** or select the preset *"Campus Library -> North Student Hostel"*. The Safety Score displays **14 (SAFE)**.
-2. **Step 2 — Approaching Hotspot**: Click **"2. Approaching Hotspot"**. The user marker moves near 4th St Underpass where 2 harassment reports exist. The AI Risk Score increases to **56 (HIGH)** with clear explainable signals.
-3. **Step 3 — Route Deviation Anomaly**: Click **"3. Route Deviation Anomaly"**. The user detours down an isolated industrial lane. The score jumps to **78 (CRITICAL)**, prompting an immediate check-in.
-4. **Step 4 — AI Distress Assistant**: Click the **"AI Assistant"** button in the header and tap the prompt *"Someone has been following me for 2 blocks"*. Observe the instant structured analysis, safe action steps, and 1-tap SOS trigger.
-5. **Step 5 — Route Safety Simulator**: Click **"Route AI"** to compare standard shortcut (High Risk: 72) vs Guardian Safe Corridor (Safe: 18).
-6. **Step 6 — Emergency SOS**: Slide the SOS button or hold for 2 seconds to view the live GPS broadcast and trusted contact alert dispatch HUD.
-
----
 
 ## 🔒 Security & Privacy by Design
 - **Zero Real-World Fabrication**: AI recommendations and hazard scoring strictly reflect real inputs and spatial data.
