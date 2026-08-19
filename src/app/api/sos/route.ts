@@ -4,9 +4,10 @@ import { z } from "zod";
 const SOSAlertSchema = z.object({
   journeyId: z.string().optional(),
   userId: z.string().default("usr_guardian_01"),
-  triggerType: z.enum(["manual_hold", "manual_slide", "ai_escalation", "missed_checkin"]),
-  latitude: z.number(),
-  longitude: z.number(),
+  triggerType: z.string().default("manual_hold"),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
+  accuracy: z.number().optional(),
   contacts: z.array(
     z.object({
       name: z.string(),
@@ -15,6 +16,8 @@ const SOSAlertSchema = z.object({
     })
   ).default([]),
   timestamp: z.string().default(new Date().toISOString()),
+  notificationStatus: z.string().default("DEMO"),
+  locationUnavailable: z.boolean().default(false),
 });
 
 export async function POST(req: NextRequest) {
@@ -31,38 +34,48 @@ export async function POST(req: NextRequest) {
 
     const alertData = validated.data;
     const alertId = `sos_${Date.now()}`;
+    const hasLocation = typeof alertData.latitude === "number" && typeof alertData.longitude === "number";
 
-    // Format dispatched notification payload for trusted contacts
-    const dispatchedContacts = alertData.contacts.map((c) => ({
+    // Emergency notification architecture (Demo status recorded when real provider not configured)
+    const notificationLog = alertData.contacts.map((c) => ({
       ...c,
-      status: "DISPATCHED",
-      channel: "SMS + High Priority Push Alert",
-      message: `EMERGENCY ALERT: ${c.name}, user triggered SOS near (${alertData.latitude.toFixed(4)}, ${alertData.longitude.toFixed(4)}). Live tracking link: https://guardian-ai.safety/live/${alertId}`,
-      deliveredAt: new Date().toISOString(),
+      status: "DEMO_RECORDED",
+      channel: "Emergency Broadcast (Demo Mode)",
+      message: hasLocation
+        ? `EMERGENCY ALERT: User triggered SOS near (${alertData.latitude?.toFixed(4)}, ${alertData.longitude?.toFixed(4)}). Live Location: https://maps.google.com/?q=${alertData.latitude},${alertData.longitude}`
+        : `EMERGENCY ALERT: User triggered SOS (GPS location unavailable).`,
+      notificationStatus: "DEMO",
+      note: "Emergency notification recorded for demo.",
     }));
 
     return NextResponse.json({
       success: true,
       alertId,
-      status: "ACTIVE_ALERT",
+      status: "ACTIVE",
       triggerType: alertData.triggerType,
-      coordinates: {
+      hasLocation,
+      locationMessage: hasLocation
+        ? "Location coordinates captured."
+        : "Location unavailable, but SOS is active.",
+      coordinates: hasLocation ? {
         lat: alertData.latitude,
         lng: alertData.longitude,
-      },
-      dispatchedContacts,
-      audioAlarmTriggered: true,
+        accuracy: alertData.accuracy,
+      } : null,
+      notificationStatus: "DEMO",
+      notificationMessage: "Emergency notification recorded for demo.",
+      dispatchedContacts: notificationLog,
       instructions: [
-        "Stay calm and move towards illuminated public premises if safe",
-        "Keep phone screen active for emergency responder location ping",
-        "If safe to speak, connect directly with local emergency services"
+        "Stay in or move toward well-lit public areas if safe to do so",
+        "Keep your device powered and unlocked",
+        "If you are safe, tap 'Mark Safe' below to resolve the alert"
       ],
       timestamp: alertData.timestamp,
     });
   } catch (error) {
     console.error("SOS Alert error:", error);
     return NextResponse.json(
-      { error: "Failed to dispatch SOS alert", message: String(error) },
+      { error: "Failed to activate emergency SOS", message: "Internal server error" },
       { status: 500 }
     );
   }

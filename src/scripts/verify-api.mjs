@@ -1,5 +1,11 @@
 async function verifyAll() {
-  const BASE_URL = "http://localhost:3001";
+  let BASE_URL = "http://localhost:3000";
+  try {
+    const check3000 = await fetch("http://localhost:3000/login");
+    if (check3000.status === 200) BASE_URL = "http://localhost:3000";
+  } catch {
+    BASE_URL = "http://localhost:3001";
+  }
   console.log(`Starting comprehensive verification against ${BASE_URL}...\n`);
 
   const pages = ["/", "/dashboard", "/journey", "/map", "/reports", "/assistant", "/profile", "/login", "/signup"];
@@ -84,9 +90,9 @@ async function verifyAll() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        originName: "Campus Library",
+        originName: "Campus Library Plaza",
         originCoords: { lat: 37.7718, lng: -122.4225 },
-        destinationName: "North Hostel",
+        destinationName: "North Student Hostel",
         destinationCoords: { lat: 37.7792, lng: -122.4158 },
       }),
     });

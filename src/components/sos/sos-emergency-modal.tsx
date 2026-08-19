@@ -2,134 +2,167 @@
 
 import React, { useState } from "react";
 import { useGuardian } from "@/lib/store/demo-context";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   ShieldAlert, 
   PhoneCall, 
   Users, 
   MapPin, 
   CheckCircle2, 
-  X, 
-  AlertTriangle,
   Radio,
-  ExternalLink
+  Share2,
+  Copy,
+  Check,
+  AlertTriangle,
+  HeartHandshake
 } from "lucide-react";
 
 export function SOSEmergencyModal() {
-  const { sosActive, sosDetails, cancelSOS, currentCoords, userProfile } = useGuardian();
-  const [isConfirmingDeactivate, setIsConfirmingDeactivate] = useState(false);
+  const { 
+    sosActive, 
+    sosAlert, 
+    resolveSOS, 
+    cancelSOS, 
+    currentCoords, 
+    getShareableLocationUrl 
+  } = useGuardian();
+  
+  const { trustedContacts } = useAuth();
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [isResolving, setIsResolving] = useState(false);
+  const [resolutionSuccess, setResolutionSuccess] = useState(false);
 
   if (!sosActive) return null;
 
+  const hasLocation = !!currentCoords && !sosAlert?.locationUnavailable;
+  const shareUrl = getShareableLocationUrl(currentCoords);
+
+  const handleCopyLink = () => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(shareUrl);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2500);
+    }
+  };
+
+  const handleMarkSafe = async () => {
+    setIsResolving(true);
+    await resolveSOS("User marked safe manually from emergency modal.");
+    setIsResolving(false);
+    setResolutionSuccess(true);
+    setTimeout(() => {
+      setResolutionSuccess(false);
+    }, 1800);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-red-950/90 backdrop-blur-md animate-in fade-in">
-      <div className="relative w-full max-w-lg rounded-3xl bg-slate-950 border-2 border-rose-500 shadow-[0_0_50px_rgba(239,68,68,0.6)] p-6 overflow-hidden">
+      <div className="relative w-full max-w-lg rounded-3xl bg-slate-950 border-2 border-rose-500 shadow-[0_0_60px_rgba(239,68,68,0.6)] p-6 overflow-hidden">
         
-        {/* Emergency Beacon Glow Header */}
-        <div className="flex items-center justify-center gap-3 mb-6">
+        {/* Emergency Beacon Pulse Header */}
+        <div className="flex items-center justify-center gap-3 mb-4">
           <div className="relative flex items-center justify-center w-16 h-16 rounded-full bg-rose-600/30 border border-rose-500/60 sos-active-pulse">
             <ShieldAlert className="w-10 h-10 text-rose-400 animate-bounce" />
           </div>
         </div>
 
-        <div className="text-center mb-6">
-          <span className="text-xs font-black tracking-widest uppercase bg-rose-500/20 text-rose-300 px-3 py-1 rounded-full border border-rose-500/40">
-            EMERGENCY SOS BROADCAST ACTIVE
+        <div className="text-center mb-5">
+          <span className="text-xs font-black tracking-widest uppercase bg-rose-500/20 text-rose-300 px-3.5 py-1 rounded-full border border-rose-500/50">
+            EMERGENCY SOS ACTIVE
           </span>
           <h2 className="text-xl font-extrabold text-white mt-2">
-            Safety Alert Dispatched
+            Safety Net Beacon Triggered
           </h2>
           <p className="text-xs text-rose-200/80 mt-1">
-            Your live GPS location and distress beacon have been transmitted to your trusted safety network.
+            Emergency alert broadcast is running.
           </p>
         </div>
 
-        {/* GPS Live Ping Box */}
-        <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-rose-500/30 mb-4 flex items-center justify-between">
+        {/* Location Status Box */}
+        <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-rose-500/40 mb-3.5 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-rose-500/20 text-rose-400">
-              <MapPin className="w-5 h-5 animate-pulse" />
+              <MapPin className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-[10px] uppercase font-bold text-slate-400 block">Live Coordinates</span>
-              <span className="text-xs font-mono font-bold text-white">
-                {currentCoords.lat.toFixed(5)}, {currentCoords.lng.toFixed(5)}
+              <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                Location Status
               </span>
+              {hasLocation ? (
+                <span className="text-xs font-mono font-bold text-white">
+                  {currentCoords.lat.toFixed(5)}, {currentCoords.lng.toFixed(5)}
+                </span>
+              ) : (
+                <span className="text-xs font-bold text-amber-300">
+                  Location unavailable, but SOS is active.
+                </span>
+              )}
             </div>
           </div>
-          <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
-            <Radio className="w-3 h-3 animate-ping" />
-            LIVE TRANSMIT
-          </span>
+
+          {hasLocation && (
+            <button
+              onClick={handleCopyLink}
+              className="text-[11px] font-semibold text-cyan-300 bg-cyan-950/60 hover:bg-cyan-900/60 px-2.5 py-1.5 rounded-lg border border-cyan-500/30 flex items-center gap-1.5 transition-colors"
+            >
+              {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copiedLink ? "Copied!" : "Share Link"}</span>
+            </button>
+          )}
         </div>
 
-        {/* Notified Contacts Status */}
-        <div className="mb-5">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mb-2">
-            <Users className="w-3.5 h-3.5 text-indigo-400" />
-            Notified Trusted Contacts ({userProfile.contacts.length})
-          </span>
+        {/* Trusted Contacts Notification Status Box */}
+        <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 mb-4 space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-bold text-slate-300 flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Emergency Network ({trustedContacts.length})</span>
+            </span>
+            <span className="text-[10px] font-mono text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
+              DEMO NOTIFICATION
+            </span>
+          </div>
 
-          <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
-            {userProfile.contacts.map((contact) => (
-              <div
-                key={contact.id}
-                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs"
-              >
-                <div>
-                  <span className="font-semibold text-white block">{contact.name}</span>
-                  <span className="text-[10px] text-slate-400">{contact.relationship} • {contact.phone}</span>
-                </div>
-                <div className="flex items-center gap-1 text-[11px] font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
-                  <CheckCircle2 className="w-3 h-3" />
-                  <span>ALERTED</span>
-                </div>
+          <p className="text-[11px] text-slate-400">
+            Emergency notification recorded for demo.
+          </p>
+
+          <div className="space-y-1.5 max-h-24 overflow-y-auto pr-1">
+            {trustedContacts.map((c) => (
+              <div key={c.id} className="flex items-center justify-between text-[11px] text-slate-300 bg-slate-950/60 p-1.5 rounded-lg">
+                <span>{c.name} ({c.relationship})</span>
+                <span className="text-emerald-400 text-[10px] font-mono font-semibold">RECORDED</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Direct Call to Emergency Services */}
+        {/* Success Resolution Banner */}
+        {resolutionSuccess && (
+          <div className="p-3 rounded-xl bg-emerald-950/90 border border-emerald-500 text-xs text-emerald-200 text-center font-bold mb-3 animate-in fade-in">
+            SOS resolved. You&apos;re marked safe.
+          </div>
+        )}
+
+        {/* Action Buttons */}
         <div className="space-y-2">
           <a
             href="tel:112"
-            className="w-full py-3.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-rose-600/40 transition-colors"
+            className="w-full py-3.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-rose-600/40 transition-colors"
           >
-            <PhoneCall className="w-5 h-5 animate-pulse" />
+            <PhoneCall className="w-4 h-4 animate-pulse" />
             <span>Call Local Emergency (112 / 911)</span>
           </a>
 
-          {/* Safe Deactivate Button */}
-          {!isConfirmingDeactivate ? (
-            <button
-              type="button"
-              onClick={() => setIsConfirmingDeactivate(true)}
-              className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700 transition-colors"
-            >
-              I am Safe — Deactivate SOS Alert
-            </button>
-          ) : (
-            <div className="p-3 rounded-xl bg-slate-900 border border-slate-700 space-y-2 animate-in fade-in">
-              <span className="text-xs font-bold text-white block text-center">
-                Confirm: Are you safe to cancel the broadcast?
-              </span>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={cancelSOS}
-                  className="py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors"
-                >
-                  Yes, Cancel SOS
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsConfirmingDeactivate(false)}
-                  className="py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors"
-                >
-                  Keep Active
-                </button>
-              </div>
-            </div>
-          )}
+          <button
+            type="button"
+            onClick={handleMarkSafe}
+            disabled={isResolving}
+            className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-colors"
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            <span>{isResolving ? "Resolving SOS..." : "Mark Safe — Resolve SOS Alert"}</span>
+          </button>
         </div>
 
       </div>

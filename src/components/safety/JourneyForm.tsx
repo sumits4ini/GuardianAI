@@ -16,7 +16,7 @@ interface JourneyFormProps {
     destCoords: Coordinates,
     durationMins: number,
     checkInIntervalMins: number
-  ) => Promise<void>;
+  ) => Promise<any>;
 }
 
 export function JourneyForm({ currentCoords, onSubmit }: JourneyFormProps) {

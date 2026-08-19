@@ -1,11 +1,17 @@
-import { createClient } from "@supabase/supabase-js";
-
 async function runPhase1ATests() {
   console.log("==================================================");
   console.log("🛡️ GUARDIANAI — PHASE 1A AUTH & DATABASE TESTS");
   console.log("==================================================\n");
 
-  const BASE_URL = "http://localhost:3001";
+  let BASE_URL = "http://localhost:3000";
+  try {
+    const check3000 = await fetch("http://localhost:3000/login");
+    if (check3000.status === 200) BASE_URL = "http://localhost:3000";
+  } catch {
+    BASE_URL = "http://localhost:3001";
+  }
+  console.log(`Using Dev Server: ${BASE_URL}\n`);
+
   let passed = 0;
   let failed = 0;
 
@@ -73,7 +79,6 @@ async function runPhase1ATests() {
   // 3. Simulating Signup -> Profile -> Contacts CRUD Lifecycle
   console.log("\n--- 3. Testing Auth & Contact Lifecycle Operations ---");
   
-  // A. Signup Simulation
   let simulatedUser = null;
   let simulatedProfile = null;
   let simulatedContacts = [];
@@ -102,14 +107,12 @@ async function runPhase1ATests() {
   assert(signupResult.success, "Signup creates user and initializes profile record");
   assert(simulatedProfile?.fullName === "Maya Lin", "Profile record matches signup details");
 
-  // B. Error Handling Tests
   const weakPass = simulateSignUp("Maya Lin", "maya@test.com", "123");
   assert(!weakPass.success && weakPass.error?.includes("6 characters"), "Weak password validation properly rejects");
 
   const badEmail = simulateSignUp("Maya Lin", "invalid-email", "password123");
   assert(!badEmail.success && badEmail.error?.includes("Invalid email"), "Invalid email validation properly rejects");
 
-  // C. Profile Update
   function simulateUpdateProfile(updates) {
     if (!simulatedProfile) return { success: false, error: "No profile" };
     simulatedProfile = { ...simulatedProfile, ...updates, updatedAt: new Date().toISOString() };
@@ -123,7 +126,6 @@ async function runPhase1ATests() {
   assert(updateProfRes.success, "Profile update executes successfully");
   assert(simulatedProfile.emergencyNotes === "Blood type A+, allergic to penicillin", "Emergency notes saved to profile");
 
-  // D. Contact Add
   function simulateAddContact(contact) {
     if (!contact.name || contact.name.length < 2) return { success: false, error: "Invalid name" };
     if (!contact.phone || contact.phone.length < 7) return { success: false, error: "Invalid phone" };
@@ -144,7 +146,6 @@ async function runPhase1ATests() {
   assert(addContactRes.success, "Add trusted contact completes successfully");
   assert(simulatedContacts.length === 1, "Trusted contacts count is 1");
 
-  // E. Contact Edit
   function simulateUpdateContact(id, updates) {
     const idx = simulatedContacts.findIndex((c) => c.id === id);
     if (idx === -1) return { success: false, error: "Not found" };
@@ -159,7 +160,6 @@ async function runPhase1ATests() {
   assert(editContactRes.success, "Edit trusted contact completes successfully");
   assert(simulatedContacts[0].relationship === "Older Brother", "Contact relationship update verified");
 
-  // F. Contact Delete
   function simulateDeleteContact(id) {
     simulatedContacts = simulatedContacts.filter((c) => c.id !== id);
     return { success: true };

@@ -31,7 +31,9 @@ export function ActiveJourneyHUD({ journey, onOpenReportModal }: ActiveJourneyHU
   useEffect(() => {
     const updateTimers = () => {
       setEtaRemaining(formatTimeRemaining(journey.expectedArrival));
-      setCheckInRemaining(formatTimeRemaining(journey.nextCheckInDue));
+      if (journey.nextCheckInDue) {
+        setCheckInRemaining(formatTimeRemaining(journey.nextCheckInDue));
+      }
     };
 
     updateTimers();
@@ -134,7 +136,7 @@ export function ActiveJourneyHUD({ journey, onOpenReportModal }: ActiveJourneyHU
             <span>Next Check-in</span>
           </div>
           <div className="text-sm font-bold text-white font-mono">
-            {formatTime(journey.nextCheckInDue)}
+            {formatTime(journey.nextCheckInDue || journey.expectedArrival)}
           </div>
           <span className="text-[10px] text-amber-300 font-mono">
             {checkInRemaining}

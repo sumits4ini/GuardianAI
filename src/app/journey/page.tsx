@@ -11,7 +11,7 @@ import { SafetyScore } from "@/components/dashboard/SafetyScore";
 import { SOSButton } from "@/components/safety/SOSButton";
 import { SOSEmergencyModal } from "@/components/sos/sos-emergency-modal";
 import { useGuardian } from "@/lib/store/demo-context";
-import { Compass, ShieldCheck } from "lucide-react";
+import { Compass, ShieldCheck, MapPin, AlertTriangle } from "lucide-react";
 
 export default function JourneyPage() {
   const {
@@ -19,7 +19,10 @@ export default function JourneyPage() {
     currentCoords,
     startJourney,
     performCheckIn,
+    extendJourney,
     completeJourney,
+    cancelJourney,
+    triggerSOS,
     riskAssessment,
     isEvaluatingRisk,
     evaluateRisk,
@@ -39,12 +42,14 @@ export default function JourneyPage() {
               <Compass className="w-6 h-6 animate-spin" style={{ animationDuration: "12s" }} />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">Safety Journey Net</h1>
-              <p className="text-xs text-slate-400">Proactive corridor tracking and route anomaly monitoring</p>
+              <h1 className="text-xl font-bold text-white">Personal Safety Journey</h1>
+              <p className="text-xs text-slate-400">Proactive corridor tracking, expected arrival monitoring & check-in</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            {/* Left Column (7 Cols): Active Journey Card or Start Journey Form */}
             <div className="lg:col-span-7 space-y-6">
               {activeJourney ? (
                 <div className="space-y-4">
@@ -52,18 +57,30 @@ export default function JourneyPage() {
                     journey={activeJourney}
                     onCheckIn={performCheckIn}
                     onComplete={completeJourney}
+                    onCancel={cancelJourney}
+                    onExtend={extendJourney}
+                    onTriggerSOS={() => triggerSOS("manual_hold")}
                   />
+
                   <div className="p-4 rounded-2xl glass-panel border border-slate-800 space-y-2">
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                      Journey Monitoring Status
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                      <span>Active Corridor Protection Active</span>
                     </h3>
-                    <p className="text-xs text-slate-300">
-                      GPS coordinates are evaluated every 10 seconds against the expected corridor. Anomaly alerts are triggered automatically if route deviations or unexpected stops occur.
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      Your starting location is logged. If your expected arrival time passes without a check-in, GuardianAI alerts you before escalating.
                     </p>
                   </div>
                 </div>
               ) : (
-                <div className="p-5 rounded-2xl glass-panel-elevated border border-slate-800">
+                <div className="p-5 rounded-2xl glass-panel-elevated border border-slate-800 space-y-4">
+                  <div>
+                    <h2 className="text-sm font-bold text-white">Plan & Start Safety Journey</h2>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Choose destination and expected arrival. GPS location is captured as starting point when available.
+                    </p>
+                  </div>
+
                   <JourneyForm
                     currentCoords={currentCoords}
                     onSubmit={startJourney}
@@ -72,6 +89,7 @@ export default function JourneyPage() {
               )}
             </div>
 
+            {/* Right Column (5 Cols): Risk Score & SOS Beacon */}
             <div className="lg:col-span-5 space-y-6">
               <SafetyScore
                 score={riskAssessment.riskScore}
@@ -83,6 +101,7 @@ export default function JourneyPage() {
 
               <SOSButton />
             </div>
+
           </div>
         </main>
       </div>
