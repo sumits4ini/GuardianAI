@@ -16,7 +16,7 @@ export default function AssistantPage() {
   const { riskAssessment } = useGuardian();
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col pb-16 lg:pb-0">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col pb-16 lg:pb-0 transition-colors duration-200">
       <Navbar />
       <DemoControllerBar />
 
@@ -25,12 +25,12 @@ export default function AssistantPage() {
 
         <main className="flex-1 p-4 sm:p-6 space-y-6">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-400">
+            <div className="p-2.5 rounded-xl bg-purple-100 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/30 text-purple-700 dark:text-purple-400">
               <Sparkles className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">AI Safety Intelligence Assistant</h1>
-              <p className="text-xs text-slate-400">Real-time distress analysis, tactical guidance & emergency escalation</p>
+              <h1 className="text-xl font-bold text-slate-900 dark:text-white">AI Safety Intelligence Assistant</h1>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Real-time distress analysis, tactical guidance & emergency escalation</p>
             </div>
           </div>
 

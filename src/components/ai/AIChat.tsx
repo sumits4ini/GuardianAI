@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { DistressChatMessage } from "@/types";
 import { useGuardian } from "@/lib/store/demo-context";
-import { Sparkles, Send, Bot, User, CheckCircle2, ShieldAlert, ShieldCheck, HelpCircle, Navigation } from "lucide-react";
+import { Sparkles, Send, CheckCircle2, ShieldAlert, ShieldCheck } from "lucide-react";
 
 const QUICK_SAFETY_SCENARIOS = [
   "Someone is following me.",
@@ -15,7 +15,7 @@ const QUICK_SAFETY_SCENARIOS = [
 ];
 
 export function AIChat() {
-  const { triggerSOS, currentCoords, activeJourney, riskAssessment } = useGuardian();
+  const { triggerSOS, activeJourney, riskAssessment } = useGuardian();
   const [messages, setMessages] = useState<DistressChatMessage[]>([
     {
       id: "msg_welcome",
@@ -101,27 +101,27 @@ export function AIChat() {
   };
 
   return (
-    <div className="flex flex-col h-[580px] rounded-2xl glass-panel-elevated border border-slate-800 overflow-hidden">
+    <div className="flex flex-col h-[580px] rounded-2xl glass-panel-elevated border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm transition-colors">
       
       {/* Header */}
-      <div className="p-3.5 border-b border-slate-800 glass-panel flex items-center justify-between">
+      <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 glass-panel flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400">
+          <div className="p-2 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400">
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-xs font-bold text-white">AI Safety Intelligence Assistant</h3>
-            <p className="text-[10px] text-slate-400">Contextual distress evaluation & tactical advice</p>
+            <h3 className="text-xs font-bold text-slate-900 dark:text-white">AI Safety Intelligence Assistant</h3>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400">Contextual distress evaluation & tactical advice</p>
           </div>
         </div>
-        <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">
+        <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-500/30">
           SAFETY ADVISORY
         </span>
       </div>
 
       {/* Safety Advisory Disclaimer */}
-      <div className="px-3 py-1.5 bg-indigo-950/40 border-b border-indigo-500/20 text-[10px] text-indigo-300 flex items-center gap-1.5">
-        <ShieldCheck className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
+      <div className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/40 border-b border-indigo-200 dark:border-indigo-500/20 text-[10px] text-indigo-800 dark:text-indigo-300 flex items-center gap-1.5">
+        <ShieldCheck className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
         <span>Advisory assistant • Never guarantees safety • Does not replace 911 / 112 services.</span>
       </div>
 
@@ -130,7 +130,7 @@ export function AIChat() {
         
         {/* Quick Safety Scenarios */}
         <div className="space-y-1.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
             Common Safety Scenarios:
           </span>
           <div className="flex flex-wrap gap-1.5">
@@ -138,7 +138,7 @@ export function AIChat() {
               <button
                 key={idx}
                 onClick={() => handleSend(q)}
-                className="text-left text-[11px] px-2 py-1 rounded-lg bg-slate-900 hover:bg-indigo-950/60 border border-slate-800 text-slate-300 hover:text-indigo-200 transition-colors"
+                className="text-left text-[11px] px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-indigo-700 dark:hover:text-indigo-200 transition-colors shadow-sm"
               >
                 &ldquo;{q}&rdquo;
               </button>
@@ -151,19 +151,19 @@ export function AIChat() {
             <div
               className={`max-w-[85%] rounded-2xl p-3.5 text-xs ${
                 msg.sender === "user"
-                  ? "bg-indigo-600 text-white rounded-br-none"
-                  : "bg-slate-900 border border-slate-800 text-slate-200 rounded-bl-none space-y-2"
+                  ? "bg-indigo-600 text-white rounded-br-none shadow-md shadow-indigo-600/20"
+                  : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-none space-y-2 shadow-sm"
               }`}
             >
               <p className="leading-relaxed whitespace-pre-line">{msg.message}</p>
               
               {msg.analysis && (
-                <div className="mt-2 pt-2 border-t border-slate-800 space-y-2">
+                <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-800 space-y-2">
                   {msg.analysis.recommendedActions && (
                     <div className="space-y-1">
                       {msg.analysis.recommendedActions.map((a, i) => (
-                        <div key={i} className="flex items-start gap-1 text-[11px] text-slate-300">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-400 mt-0.5 flex-shrink-0" />
+                        <div key={i} className="flex items-start gap-1 text-[11px] text-slate-600 dark:text-slate-300">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
                           <span>{a}</span>
                         </div>
                       ))}
@@ -185,12 +185,12 @@ export function AIChat() {
           </div>
         ))}
 
-        {isTyping && <div className="text-xs text-slate-400 italic">GuardianAI Safety Assistant is analyzing...</div>}
+        {isTyping && <div className="text-xs text-slate-500 dark:text-slate-400 italic">GuardianAI Safety Assistant is analyzing...</div>}
         <div ref={chatEndRef} />
       </div>
 
       {/* Input Box */}
-      <div className="p-3 border-t border-slate-800 glass-panel">
+      <div className="p-3 border-t border-slate-200 dark:border-slate-800 glass-panel">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -203,12 +203,12 @@ export function AIChat() {
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             placeholder="Ask about your risk score, or describe your situation..."
-            className="flex-1 px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+            className="flex-1 px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500 shadow-sm"
           />
           <button
             type="submit"
             disabled={!inputMessage.trim() || isTyping}
-            className="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50 transition-colors"
+            className="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50 transition-colors shadow-sm"
           >
             <Send className="w-4 h-4" />
           </button>

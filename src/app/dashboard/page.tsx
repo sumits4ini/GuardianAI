@@ -15,7 +15,7 @@ import { CheckInButton } from "@/components/safety/CheckInButton";
 import { SafetyMap } from "@/components/map/SafetyMap";
 import { SOSEmergencyModal } from "@/components/sos/sos-emergency-modal";
 import { useGuardian } from "@/lib/store/demo-context";
-import { Play, Navigation, ShieldCheck, Compass, MessageSquare } from "lucide-react";
+import { Play, ShieldCheck, Compass, MessageSquare } from "lucide-react";
 
 export default function DashboardPage() {
   const {
@@ -33,7 +33,7 @@ export default function DashboardPage() {
   } = useGuardian();
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col pb-16 lg:pb-0">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col pb-16 lg:pb-0 transition-colors duration-200">
       <Navbar />
       <DemoControllerBar />
 
@@ -51,12 +51,12 @@ export default function DashboardPage() {
           />
 
           {/* Section 2: PRIMARY SAFETY ACTIONS HUB (Mobile & Desktop Top Hub) */}
-          <div className="p-4 rounded-2xl glass-panel-elevated border border-slate-800 space-y-3">
+          <div className="p-4 rounded-2xl glass-panel-elevated border border-slate-200 dark:border-slate-800 space-y-3 shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Primary Safety Actions
               </span>
-              <span className="text-[10px] text-indigo-400 font-medium">
+              <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium">
                 {activeJourney ? "Corridor Tracking Active" : "Standby Net"}
               </span>
             </div>
@@ -79,9 +79,9 @@ export default function DashboardPage() {
               ) : (
                 <Link
                   href="/journey"
-                  className="py-3.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-cyan-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 border border-slate-700 transition-all"
+                  className="py-3.5 px-4 rounded-2xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-800 dark:text-cyan-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 border border-slate-300 dark:border-slate-700 transition-all"
                 >
-                  <Compass className="w-4 h-4 text-cyan-400" />
+                  <Compass className="w-4 h-4 text-indigo-600 dark:text-cyan-400" />
                   <span>MANAGE ACTIVE JOURNEY</span>
                 </Link>
               )}
@@ -112,17 +112,17 @@ export default function DashboardPage() {
                   onTriggerSOS={() => triggerSOS("manual_hold")}
                 />
               ) : (
-                <div className="p-5 rounded-2xl glass-panel border border-slate-800 space-y-3">
+                <div className="p-5 rounded-2xl glass-panel border border-slate-200 dark:border-slate-800 space-y-3 shadow-sm">
                   <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/30">
+                    <div className="p-2 rounded-xl bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30">
                       <ShieldCheck className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-bold text-white">No Active Journey</h3>
-                      <p className="text-[11px] text-slate-400">Activate corridor protection for your commute</p>
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white">No Active Journey</h3>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">Activate corridor protection for your commute</p>
                     </div>
                   </div>
-                  <p className="text-xs text-slate-300 leading-relaxed">
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                     Set your destination and expected arrival time. GuardianAI will watch your route in real time.
                   </p>
                   <div className="grid grid-cols-2 gap-2 pt-1">
@@ -135,9 +135,9 @@ export default function DashboardPage() {
                     </Link>
                     <Link
                       href="/assistant"
-                      className="py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold text-xs border border-slate-700 flex items-center justify-center gap-1.5"
+                      className="py-2.5 px-3 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-1.5 shadow-sm"
                     >
-                      <MessageSquare className="w-3.5 h-3.5 text-indigo-400" />
+                      <MessageSquare className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                       <span>Safety AI Chat</span>
                     </Link>
                   </div>

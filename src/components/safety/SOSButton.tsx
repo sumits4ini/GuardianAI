@@ -57,28 +57,28 @@ export function SOSButton() {
   };
 
   return (
-    <div className="p-4 rounded-2xl bg-gradient-to-b from-rose-950/40 via-slate-900 to-slate-950 border border-rose-500/40 shadow-xl shadow-rose-950/30">
+    <div className="p-4 rounded-2xl bg-gradient-to-b from-rose-50 dark:from-rose-950/40 via-white dark:via-slate-900 to-white dark:to-slate-950 border border-rose-300 dark:border-rose-500/40 shadow-xl shadow-rose-950/10 dark:shadow-rose-950/30 transition-colors">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-rose-500/20 text-rose-400">
+          <div className="p-1.5 rounded-lg bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400">
             <AlertOctagon className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-rose-300">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-rose-700 dark:text-rose-300">
               Emergency SOS Beacon
             </h3>
-            <p className="text-[10px] text-slate-400">
+            <p className="text-[10px] text-slate-500 dark:text-slate-400">
               Instant trusted contacts dispatch & GPS beacon
             </p>
           </div>
         </div>
 
-        <div className="flex items-center bg-slate-950 p-0.5 rounded-lg border border-slate-800 text-[10px]">
+        <div className="flex items-center bg-slate-100 dark:bg-slate-950 p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-[10px]">
           <button
             type="button"
             onClick={() => setMode("slide")}
             className={`px-2 py-1 rounded font-medium transition-colors ${
-              mode === "slide" ? "bg-rose-600 text-white" : "text-slate-400 hover:text-slate-200"
+              mode === "slide" ? "bg-rose-600 text-white" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
             }`}
           >
             Slide
@@ -87,7 +87,7 @@ export function SOSButton() {
             type="button"
             onClick={() => setMode("hold")}
             className={`px-2 py-1 rounded font-medium transition-colors ${
-              mode === "hold" ? "bg-rose-600 text-white" : "text-slate-400 hover:text-slate-200"
+              mode === "hold" ? "bg-rose-600 text-white" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
             }`}
           >
             Hold 2s
@@ -103,10 +103,10 @@ export function SOSButton() {
           onMouseLeave={() => { setIsDragging(false); setSliderPosition(0); }}
           onTouchMove={(e) => isDragging && handleSliderMove(e.touches[0].clientX)}
           onTouchEnd={() => { setIsDragging(false); setSliderPosition(0); }}
-          className="relative w-full h-14 bg-slate-950 rounded-xl border border-rose-500/30 overflow-hidden flex items-center select-none"
+          className="relative w-full h-14 bg-slate-100 dark:bg-slate-950 rounded-xl border border-rose-300 dark:border-rose-500/30 overflow-hidden flex items-center select-none"
         >
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <span className="text-xs font-bold tracking-wider uppercase text-rose-300/70 flex items-center gap-1">
+            <span className="text-xs font-bold tracking-wider uppercase text-rose-700/80 dark:text-rose-300/70 flex items-center gap-1">
               Slide to Activate SOS
               <ChevronRight className="w-4 h-4 animate-pulse" />
             </span>
@@ -129,13 +129,13 @@ export function SOSButton() {
           onMouseLeave={endHold}
           onTouchStart={startHold}
           onTouchEnd={endHold}
-          className="relative w-full h-14 rounded-xl bg-slate-950 border border-rose-500/40 overflow-hidden flex items-center justify-center group select-none active:scale-[0.99] transition-transform"
+          className="relative w-full h-14 rounded-xl bg-slate-100 dark:bg-slate-950 border border-rose-300 dark:border-rose-500/40 overflow-hidden flex items-center justify-center group select-none active:scale-[0.99] transition-transform"
         >
           <div
             style={{ width: `${holdProgress}%` }}
             className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-rose-600 to-red-600 transition-all duration-75 opacity-90"
           />
-          <div className="relative z-10 flex items-center gap-2 text-rose-200 group-hover:text-white font-bold text-xs uppercase tracking-wider">
+          <div className="relative z-10 flex items-center gap-2 text-rose-700 dark:text-rose-200 group-hover:text-white font-bold text-xs uppercase tracking-wider">
             <ShieldAlert className={`w-5 h-5 ${isHolding ? "animate-spin" : ""}`} />
             <span>
               {isHolding ? `Hold for SOS (${Math.round(holdProgress)}%)` : "Press & Hold for 2s to Trigger SOS"}

@@ -2,22 +2,17 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useGuardian } from "@/lib/store/demo-context";
+import { useTheme } from "@/lib/theme/theme-context";
 import { CommunityReport } from "@/types";
-import { detectSafetyHotspots, SafetyHotspot } from "@/lib/safety/hotspot-detector";
-import { calculateEmergingRiskTrend, EmergingRiskTrend } from "@/lib/safety/trend-analyzer";
+import { detectSafetyHotspots } from "@/lib/safety/hotspot-detector";
+import { calculateEmergingRiskTrend } from "@/lib/safety/trend-analyzer";
 import { RouteComparisonModal } from "@/components/safety/RouteComparisonModal";
 import { 
   Sparkles, 
   Filter, 
-  Layers, 
-  Compass, 
   Navigation, 
   TrendingUp, 
-  AlertTriangle, 
-  X, 
-  ShieldCheck, 
-  Lightbulb, 
-  Users 
+  X
 } from "lucide-react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -47,6 +42,7 @@ const TIME_WINDOWS = [
 
 export default function SafetyMapView() {
   const { currentCoords, activeJourney, communityReports, riskAssessment } = useGuardian();
+  const { resolvedTheme } = useTheme();
   
   // Filter States
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -61,6 +57,7 @@ export default function SafetyMapView() {
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
   const userMarkerRef = useRef<L.Marker | null>(null);
   const destMarkerRef = useRef<L.Marker | null>(null);
   const reportsLayerGroupRef = useRef<L.LayerGroup | null>(null);
@@ -93,13 +90,15 @@ export default function SafetyMapView() {
       zoomControl: false,
     });
 
-    L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-      {
-        attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
-        maxZoom: 19,
-      }
-    ).addTo(map);
+    const isDark = resolvedTheme === "dark";
+    const tileUrl = isDark
+      ? "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+      : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+
+    tileLayerRef.current = L.tileLayer(tileUrl, {
+      attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      maxZoom: 19,
+    }).addTo(map);
 
     L.control.zoom({ position: "bottomright" }).addTo(map);
 
@@ -113,6 +112,16 @@ export default function SafetyMapView() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Update Tile Layer on Theme Change
+  useEffect(() => {
+    if (!mapInstanceRef.current || !tileLayerRef.current) return;
+    const isDark = resolvedTheme === "dark";
+    const tileUrl = isDark
+      ? "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+      : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+    tileLayerRef.current.setUrl(tileUrl);
+  }, [resolvedTheme]);
 
   // Update User Location Marker & Risk Perimeter
   useEffect(() => {
@@ -343,22 +352,22 @@ export default function SafetyMapView() {
   };
 
   return (
-    <div className="relative w-full h-full min-h-[500px] rounded-3xl overflow-hidden border border-slate-800 shadow-2xl flex flex-col">
+    <div className="relative w-full h-full min-h-[500px] rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col transition-colors">
       
       {/* Top Map Action HUD Bar */}
       <div className="absolute top-3 left-3 right-3 z-[400] flex flex-wrap items-center justify-between gap-2 pointer-events-auto">
         
         {/* Risk Trend & Active Layer Badge */}
         <div className="flex items-center gap-2">
-          <div className="bg-slate-950/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-800 text-[11px] font-semibold text-slate-200 flex items-center gap-2 shadow-lg">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <div className="bg-white/90 dark:bg-slate-950/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-[11px] font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2 shadow-lg">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span>{filteredReports.length} Reports Active</span>
           </div>
 
           <div className={`px-2.5 py-1.5 rounded-xl border text-[11px] font-extrabold backdrop-blur-md flex items-center gap-1 shadow-lg ${
             riskTrend.trend === "INCREASING" 
-              ? "bg-rose-950/80 border-rose-500/50 text-rose-300"
-              : "bg-slate-950/80 border-slate-800 text-slate-300"
+              ? "bg-rose-50/90 dark:bg-rose-950/80 border-rose-300 dark:border-rose-500/50 text-rose-700 dark:text-rose-300"
+              : "bg-white/90 dark:bg-slate-950/80 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-300"
           }`}>
             <TrendingUp className="w-3.5 h-3.5" />
             <span>{riskTrend.trendBadge}</span>
@@ -370,10 +379,10 @@ export default function SafetyMapView() {
           
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`px-3 py-1.5 rounded-xl text-[11px] font-bold border backdrop-blur-md flex items-center gap-1.5 transition-all ${
+            className={`px-3 py-1.5 rounded-xl text-[11px] font-bold border backdrop-blur-md flex items-center gap-1.5 transition-all shadow-sm ${
               showFilters
-                ? "bg-indigo-600 border-indigo-400 text-white"
-                : "bg-slate-950/85 hover:bg-slate-900 border-slate-800 text-slate-300"
+                ? "bg-indigo-600 border-indigo-500 text-white"
+                : "bg-white/90 dark:bg-slate-950/85 hover:bg-slate-100 dark:hover:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
             }`}
           >
             <Filter className="w-3.5 h-3.5" />
@@ -402,10 +411,10 @@ export default function SafetyMapView() {
 
       {/* Floating Filter Overlay Tray */}
       {showFilters && (
-        <div className="absolute top-14 left-3 right-3 z-[400] bg-slate-950/95 backdrop-blur-md p-4 rounded-2xl border border-slate-800 shadow-2xl space-y-3 animate-in fade-in">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-            <span className="text-xs font-bold text-white uppercase tracking-wider">Map Intelligence Filters</span>
-            <button onClick={() => setShowFilters(false)} className="text-slate-400 hover:text-white">
+        <div className="absolute top-14 left-3 right-3 z-[400] bg-white/95 dark:bg-slate-950/95 backdrop-blur-md p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl space-y-3 animate-in fade-in">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+            <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Map Intelligence Filters</span>
+            <button onClick={() => setShowFilters(false)} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -413,11 +422,11 @@ export default function SafetyMapView() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
             {/* Category Filter */}
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase">Category</label>
+              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Category</label>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:border-indigo-500"
+                className="w-full px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs focus:outline-none focus:border-indigo-500"
               >
                 {CATEGORIES.map((c) => (
                   <option key={c.id} value={c.id}>{c.label}</option>
@@ -427,11 +436,11 @@ export default function SafetyMapView() {
 
             {/* Severity Filter */}
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase">Risk Severity</label>
+              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Risk Severity</label>
               <select
                 value={selectedSeverity}
                 onChange={(e) => setSelectedSeverity(e.target.value)}
-                className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:border-indigo-500"
+                className="w-full px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs focus:outline-none focus:border-indigo-500"
               >
                 {SEVERITIES.map((s) => (
                   <option key={s.id} value={s.id}>{s.label}</option>
@@ -441,11 +450,11 @@ export default function SafetyMapView() {
 
             {/* Time Window Filter */}
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase">Recency</label>
+              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Recency</label>
               <select
                 value={selectedTimeWindow}
                 onChange={(e) => setSelectedTimeWindow(e.target.value)}
-                className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:border-indigo-500"
+                className="w-full px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs focus:outline-none focus:border-indigo-500"
               >
                 {TIME_WINDOWS.map((t) => (
                   <option key={t.id} value={t.id}>{t.label}</option>
@@ -461,43 +470,43 @@ export default function SafetyMapView() {
 
       {/* AI Area Analysis Bottom Drawer */}
       {areaAnalysisData && (
-        <div className="absolute bottom-3 left-3 right-3 z-[400] bg-slate-950/95 backdrop-blur-md p-4 rounded-2xl border border-indigo-500/40 shadow-2xl space-y-2 animate-in slide-in-from-bottom-2">
-          <div className="flex items-center justify-between pb-1 border-b border-slate-800">
+        <div className="absolute bottom-3 left-3 right-3 z-[400] bg-white/95 dark:bg-slate-950/95 backdrop-blur-md p-4 rounded-2xl border border-indigo-200 dark:border-indigo-500/40 shadow-2xl space-y-2 animate-in slide-in-from-bottom-2">
+          <div className="flex items-center justify-between pb-1 border-b border-slate-200 dark:border-slate-800">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-indigo-400" />
-              <h4 className="text-xs font-bold text-white">
+              <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              <h4 className="text-xs font-bold text-slate-900 dark:text-white">
                 AI Spatial Intelligence: {areaAnalysisData.locationName}
               </h4>
-              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/40">
                 Safety Index: {areaAnalysisData.overallSafetyIndex}/100
               </span>
             </div>
-            <button onClick={() => setAreaAnalysisData(null)} className="text-slate-400 hover:text-white">
+            <button onClick={() => setAreaAnalysisData(null)} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
               <X className="w-4 h-4" />
             </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
             <div>
-              <span className="text-[10px] uppercase font-bold text-slate-400 block">Dominant Hazards</span>
-              <p className="text-slate-200">{areaAnalysisData.dominantHazards?.join(" • ") || "None"}</p>
+              <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block">Dominant Hazards</span>
+              <p className="text-slate-800 dark:text-slate-200">{areaAnalysisData.dominantHazards?.join(" • ") || "None"}</p>
             </div>
             <div>
-              <span className="text-[10px] uppercase font-bold text-slate-400 block">Lighting & Foot Traffic</span>
-              <p className="text-slate-200">
+              <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block">Lighting & Foot Traffic</span>
+              <p className="text-slate-800 dark:text-slate-200">
                 Lighting: <strong>{areaAnalysisData.lightingRating}</strong> • Pedestrians: <strong>{areaAnalysisData.pedestrianDensity}</strong>
               </p>
             </div>
           </div>
 
-          <p className="text-[11px] text-indigo-200 bg-indigo-950/50 p-2 rounded-xl border border-indigo-500/30">
+          <p className="text-[11px] text-indigo-900 dark:text-indigo-200 bg-indigo-50 dark:bg-indigo-950/50 p-2 rounded-xl border border-indigo-200 dark:border-indigo-500/30">
             💡 {areaAnalysisData.aiSafetyAdvice}
           </p>
         </div>
       )}
 
       {/* Map Legend Overlay */}
-      <div className="absolute bottom-3 left-3 z-[300] bg-slate-950/90 backdrop-blur-md px-3 py-2 rounded-xl border border-slate-800 text-[10px] text-slate-300 flex items-center gap-3 shadow-lg">
+      <div className="absolute bottom-3 left-3 z-[300] bg-white/90 dark:bg-slate-950/90 backdrop-blur-md px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 text-[10px] text-slate-700 dark:text-slate-300 flex items-center gap-3 shadow-lg">
         <div className="flex items-center gap-1">
           <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
           <span>You</span>
@@ -510,7 +519,7 @@ export default function SafetyMapView() {
           <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
           <span>Lighting/Mod</span>
         </div>
-        <div className="flex items-center gap-1 border-l border-slate-700 pl-2">
+        <div className="flex items-center gap-1 border-l border-slate-300 dark:border-slate-700 pl-2">
           <span className="w-2.5 h-2.5 rounded-full bg-rose-500/30 border border-rose-500" />
           <span>Hotspot</span>
         </div>

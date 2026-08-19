@@ -10,13 +10,13 @@ interface AIRecommendationProps {
 
 export function AIRecommendation({ recommendedAction, onExecute }: AIRecommendationProps) {
   return (
-    <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-950/40 via-slate-900 to-slate-950 border border-indigo-500/30 space-y-2">
-      <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-indigo-300">
-        <Navigation className="w-3.5 h-3.5 text-indigo-400" />
+    <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-50 dark:from-indigo-950/40 via-white dark:via-slate-900 to-white dark:to-slate-950 border border-indigo-200 dark:border-indigo-500/30 space-y-2 shadow-sm transition-colors">
+      <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300">
+        <Navigation className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
         <span>AI Actionable Safety Recommendation</span>
       </div>
 
-      <p className="text-xs text-slate-200 font-medium">
+      <p className="text-xs text-slate-800 dark:text-slate-200 font-medium">
         {recommendedAction}
       </p>
 

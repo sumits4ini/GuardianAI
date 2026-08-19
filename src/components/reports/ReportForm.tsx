@@ -45,32 +45,32 @@ export function ReportForm({ onSubmitReport }: ReportFormProps) {
   };
 
   return (
-    <div className="p-5 rounded-2xl glass-panel-elevated border border-slate-800 space-y-4">
+    <div className="p-5 rounded-2xl glass-panel-elevated border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
       <div>
-        <h3 className="text-sm font-bold text-white">Submit Community Safety Hazard</h3>
-        <p className="text-[11px] text-slate-400">Anonymized observation to inform spatial safety scoring</p>
+        <h3 className="text-sm font-bold text-slate-900 dark:text-white">Submit Community Safety Hazard</h3>
+        <p className="text-[11px] text-slate-500 dark:text-slate-400">Anonymized observation to inform spatial safety scoring</p>
       </div>
 
       {success && (
-        <div className="p-3 rounded-xl bg-emerald-950/50 border border-emerald-500/40 text-xs text-emerald-300 flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+        <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-500/40 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
           <span>Report submitted successfully and classified by AI!</span>
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
-          <label className="block text-xs font-medium text-slate-300 mb-1.5">Hazard Category</label>
+          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Hazard Category</label>
           <div className="grid grid-cols-2 gap-1.5 max-h-36 overflow-y-auto pr-1">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat.value}
                 type="button"
                 onClick={() => setCategory(cat.value)}
-                className={`p-2 rounded-xl text-xs font-medium text-left border transition-all truncate flex items-center gap-1.5 ${
+                className={`p-2 rounded-xl text-xs font-medium text-left border transition-all truncate flex items-center gap-1.5 shadow-sm ${
                   category === cat.value
-                    ? "bg-indigo-600/30 border-indigo-500 text-white"
-                    : "bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200"
+                    ? "bg-indigo-100 dark:bg-indigo-600/30 border-indigo-300 dark:border-indigo-500 text-indigo-900 dark:text-white"
+                    : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
                 }`}
               >
                 <span>{cat.icon}</span>
@@ -81,32 +81,32 @@ export function ReportForm({ onSubmitReport }: ReportFormProps) {
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-slate-300 mb-1">Description</label>
+          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Description</label>
           <textarea
             rows={3}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             required
             placeholder="Describe what you observed (e.g., 3 broken streetlights, aggressive loitering)..."
-            className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none"
+            className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none shadow-sm"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-slate-300 mb-1">Approximate Location</label>
+          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Approximate Location</label>
           <div className="relative">
             <input
               type="text"
               value={locationName}
               onChange={(e) => setLocationName(e.target.value)}
-              className="w-full px-3 py-2 pl-9 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full px-3 py-2 pl-9 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500 shadow-sm"
             />
-            <MapPin className="w-4 h-4 text-amber-400 absolute left-3 top-2.5" />
+            <MapPin className="w-4 h-4 text-amber-500 dark:text-amber-400 absolute left-3 top-2.5" />
           </div>
         </div>
 
-        <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-900/80 border border-slate-800 text-[10px] text-slate-400">
-          <EyeOff className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
+        <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-[10px] text-slate-500 dark:text-slate-400">
+          <EyeOff className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
           <span>Identity and exact user coords are scrubbed for privacy.</span>
         </div>
 

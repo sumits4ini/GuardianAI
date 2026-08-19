@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { RouteComparisonResult, RouteOption } from "@/types";
+import { RouteComparisonResult } from "@/types";
 import { useGuardian } from "@/lib/store/demo-context";
 import { 
   SlidersHorizontal, 
   ShieldCheck, 
-  AlertTriangle, 
   Clock, 
   Lightbulb, 
   Users, 
@@ -64,31 +63,31 @@ export function RouteSimulatorModal({ isOpen, onClose }: RouteSimulatorModalProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-      <div className="relative w-full max-w-2xl rounded-3xl glass-panel-elevated p-6 border border-slate-700 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+      <div className="relative w-full max-w-2xl rounded-3xl bg-white dark:bg-slate-900 p-6 border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col transition-colors">
         
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+          className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+          <div className="p-2.5 rounded-xl bg-cyan-100 dark:bg-cyan-500/10 border border-cyan-200 dark:border-cyan-500/30 text-cyan-700 dark:text-cyan-400">
             <SlidersHorizontal className="w-6 h-6" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-white">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">
                 AI Route Safety Simulator
               </h2>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-100 dark:bg-cyan-500/10 text-cyan-800 dark:text-cyan-300 border border-cyan-300 dark:border-cyan-500/30">
                 PROACTIVE COMPARISON
               </span>
             </div>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Evaluates speed vs illuminated pedestrian safety factors
             </p>
           </div>
@@ -96,16 +95,16 @@ export function RouteSimulatorModal({ isOpen, onClose }: RouteSimulatorModalProp
 
         {/* AI Insight Box */}
         {comparison && (
-          <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-indigo-500/30 mb-4 space-y-2">
-            <div className="flex items-center gap-2 text-xs font-bold text-indigo-300">
-              <Sparkles className="w-4 h-4 text-indigo-400" />
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-indigo-200 dark:border-indigo-500/30 mb-4 space-y-2">
+            <div className="flex items-center gap-2 text-xs font-bold text-indigo-800 dark:text-indigo-300">
+              <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
               <span>AI Comparative Safety Analysis</span>
             </div>
-            <p className="text-xs text-slate-300 leading-relaxed">
+            <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
               {comparison.reasoning}
             </p>
-            <div className="p-2 rounded-lg bg-indigo-950/40 border border-indigo-500/20 text-[11px] text-indigo-200 flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+            <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-500/20 text-[11px] text-indigo-900 dark:text-indigo-200 flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
               <span>{comparison.safetyTip}</span>
             </div>
           </div>
@@ -115,8 +114,8 @@ export function RouteSimulatorModal({ isOpen, onClose }: RouteSimulatorModalProp
         <div className="flex-1 overflow-y-auto space-y-3 pr-1">
           {isLoading ? (
             <div className="py-12 text-center space-y-3">
-              <div className="w-8 h-8 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin mx-auto" />
-              <p className="text-xs text-slate-400">Computing route safety factors and street illumination metrics...</p>
+              <div className="w-8 h-8 rounded-full border-2 border-cyan-600 dark:border-cyan-400 border-t-transparent animate-spin mx-auto" />
+              <p className="text-xs text-slate-500 dark:text-slate-400">Computing route safety factors and street illumination metrics...</p>
             </div>
           ) : (
             comparison?.routes.map((route) => {
@@ -130,27 +129,27 @@ export function RouteSimulatorModal({ isOpen, onClose }: RouteSimulatorModalProp
                   onClick={() => setSelectedRouteId(route.id)}
                   className={`p-4 rounded-2xl border cursor-pointer transition-all ${
                     isSelected
-                      ? "bg-slate-900 border-cyan-500/80 shadow-lg shadow-cyan-500/10 ring-1 ring-cyan-500/50"
-                      : "bg-slate-950/80 border-slate-800 hover:border-slate-700"
+                      ? "bg-slate-50 dark:bg-slate-900 border-cyan-500/80 shadow-lg shadow-cyan-500/10 ring-1 ring-cyan-500/50"
+                      : "bg-white dark:bg-slate-950/80 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
                   }`}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <div className={`w-5 h-5 rounded-full flex items-center justify-center border ${
-                        isSelected ? "bg-cyan-500 border-cyan-400 text-slate-950" : "border-slate-600"
+                        isSelected ? "bg-cyan-600 dark:bg-cyan-500 border-cyan-500 text-white dark:text-slate-950" : "border-slate-300 dark:border-slate-600"
                       }`}>
                         {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-white flex items-center gap-2">
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
                           {route.name}
                           {isRecommended && (
-                            <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30">
                               RECOMMENDED SAFE ROUTE
                             </span>
                           )}
                         </h4>
-                        <p className="text-[11px] text-slate-400 mt-0.5">{route.description}</p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{route.description}</p>
                       </div>
                     </div>
 
@@ -162,21 +161,21 @@ export function RouteSimulatorModal({ isOpen, onClose }: RouteSimulatorModalProp
                   </div>
 
                   {/* Metrics Row */}
-                  <div className="grid grid-cols-4 gap-2 mt-3 pt-3 border-t border-slate-800/80 text-[11px]">
-                    <div className="flex items-center gap-1.5 text-slate-300">
+                  <div className="grid grid-cols-4 gap-2 mt-3 pt-3 border-t border-slate-200 dark:border-slate-800/80 text-[11px]">
+                    <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
                       <Clock className="w-3.5 h-3.5 text-slate-400" />
                       <span>{route.durationMins} mins</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-slate-300">
+                    <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
                       <Navigation className="w-3.5 h-3.5 text-slate-400" />
                       <span>{route.distanceKm} km</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-slate-300">
-                      <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
+                    <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                      <Lightbulb className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                       <span className="capitalize">{route.lightingLevel}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-slate-300">
-                      <Users className="w-3.5 h-3.5 text-indigo-400" />
+                    <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                      <Users className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                       <span className="capitalize">{route.crowdLevel} Density</span>
                     </div>
                   </div>
@@ -187,14 +186,13 @@ export function RouteSimulatorModal({ isOpen, onClose }: RouteSimulatorModalProp
         </div>
 
         {/* Modal Action Footer */}
-        <div className="pt-4 mt-2 border-t border-slate-800 flex items-center justify-between">
+        <div className="pt-4 mt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <span className="text-[10px] text-slate-500 font-mono">
             Advisory risk rating based on community reporting
           </span>
           <button
             onClick={() => {
               onClose();
-              // If not active, start the selected preset route
               const chosen = comparison?.routes.find((r) => r.id === selectedRouteId);
               if (chosen) {
                 startJourney(

@@ -14,8 +14,7 @@ import {
   XCircle, 
   CheckCircle2, 
   ShieldAlert, 
-  Users,
-  Plus
+  Users
 } from "lucide-react";
 
 interface JourneyCardProps {
@@ -77,10 +76,10 @@ export function JourneyCard({
   const isAttentionRequired = journey.status === "ATTENTION_REQUIRED" || isOverdue;
 
   return (
-    <div className={`p-5 rounded-2xl glass-panel-elevated border space-y-3.5 transition-all ${
+    <div className={`p-5 rounded-2xl glass-panel-elevated border space-y-3.5 transition-all shadow-sm ${
       isAttentionRequired 
-        ? "border-amber-500/60 shadow-lg shadow-amber-500/10 bg-amber-950/20" 
-        : "border-slate-800"
+        ? "border-amber-300 dark:border-amber-500/60 shadow-lg shadow-amber-500/10 bg-amber-50/50 dark:bg-amber-950/20" 
+        : "border-slate-200 dark:border-slate-800"
     }`}>
       
       {/* Header with Active Indicator and End Journey CTA */}
@@ -95,7 +94,7 @@ export function JourneyCard({
             }`}></span>
           </span>
           <span className={`text-xs font-bold uppercase tracking-wider ${
-            isAttentionRequired ? "text-amber-400" : "text-emerald-400"
+            isAttentionRequired ? "text-amber-700 dark:text-amber-400" : "text-emerald-700 dark:text-emerald-400"
           }`}>
             {isAttentionRequired ? "Attention Required" : "Active Safety Journey"}
           </span>
@@ -104,7 +103,7 @@ export function JourneyCard({
         <div className="flex items-center gap-1.5">
           <button
             onClick={onComplete}
-            className="text-[11px] font-semibold text-emerald-300 hover:text-white bg-emerald-500/15 hover:bg-emerald-500/30 px-2.5 py-1 rounded-lg border border-emerald-500/40 flex items-center gap-1 transition-colors"
+            className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 hover:text-emerald-900 dark:hover:text-white bg-emerald-100 dark:bg-emerald-500/15 hover:bg-emerald-200 dark:hover:bg-emerald-500/30 px-2.5 py-1 rounded-lg border border-emerald-300 dark:border-emerald-500/40 flex items-center gap-1 transition-colors"
             title="Mark Journey Completed"
           >
             <ShieldCheck className="w-3.5 h-3.5" />
@@ -114,7 +113,7 @@ export function JourneyCard({
           {onCancel && (
             <button
               onClick={onCancel}
-              className="text-[11px] font-semibold text-slate-400 hover:text-rose-400 bg-slate-900 px-2 py-1 rounded-lg border border-slate-800 transition-colors"
+              className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 bg-white dark:bg-slate-900 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-800 transition-colors"
               title="Cancel Journey"
             >
               <XCircle className="w-3.5 h-3.5" />
@@ -125,12 +124,12 @@ export function JourneyCard({
 
       {/* Route Deviation Anomaly Banner */}
       {journey.routeDeviationDetected && (
-        <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-500/50 space-y-1.5 animate-pulse">
-          <div className="flex items-start gap-2 text-xs text-rose-200">
-            <AlertTriangle className="w-4 h-4 text-rose-400 mt-0.5 flex-shrink-0" />
+        <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-500/50 space-y-1.5 animate-pulse">
+          <div className="flex items-start gap-2 text-xs text-rose-800 dark:text-rose-200">
+            <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400 mt-0.5 flex-shrink-0" />
             <div>
               <span className="font-bold block">Route Deviation Anomaly Detected</span>
-              <span className="text-[11px] text-rose-300/90">
+              <span className="text-[11px] text-rose-700 dark:text-rose-300/90">
                 Movement diverged from your planned travel corridor. Tap below to confirm you are safe.
               </span>
             </div>
@@ -140,12 +139,12 @@ export function JourneyCard({
 
       {/* Overdue Warning Alert Box */}
       {isAttentionRequired && (
-        <div className="p-3 rounded-xl bg-amber-950/60 border border-amber-500/50 space-y-2 animate-in fade-in">
-          <div className="flex items-start gap-2 text-xs text-amber-200">
-            <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+        <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-500/50 space-y-2 animate-in fade-in">
+          <div className="flex items-start gap-2 text-xs text-amber-900 dark:text-amber-200">
+            <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
             <div>
               <span className="font-bold block">Your expected arrival time has passed. Please check in.</span>
-              <span className="text-[11px] text-amber-300/80">
+              <span className="text-[11px] text-amber-800 dark:text-amber-300/80">
                 Confirm your safety or request assistance from trusted contacts.
               </span>
             </div>
@@ -163,7 +162,7 @@ export function JourneyCard({
             {onExtend && (
               <button
                 onClick={() => onExtend(10)}
-                className="px-3 py-1.5 rounded-lg bg-slate-850 hover:bg-slate-800 text-amber-300 text-xs font-semibold border border-amber-500/30 transition-colors"
+                className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 text-amber-800 dark:text-amber-300 text-xs font-semibold border border-amber-300 dark:border-amber-500/30 transition-colors"
               >
                 +10 Mins
               </button>
@@ -183,24 +182,24 @@ export function JourneyCard({
       )}
 
       {/* Origin & Destination Route Summary */}
-      <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-2">
+      <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 space-y-2">
         <div className="flex items-start gap-2 text-xs">
-          <Navigation className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+          <Navigation className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
           <div className="overflow-hidden">
             <span className="text-[10px] uppercase font-bold text-slate-500 block">Starting Point</span>
-            <span className="text-slate-200 font-medium truncate block">
+            <span className="text-slate-800 dark:text-slate-200 font-medium truncate block">
               {journey.originName || journey.startLocation || "Current Location"}
             </span>
           </div>
         </div>
 
-        <div className="w-px h-2.5 bg-slate-700 ml-2" />
+        <div className="w-px h-2.5 bg-slate-300 dark:bg-slate-700 ml-2" />
 
         <div className="flex items-start gap-2 text-xs">
-          <MapPin className="w-4 h-4 text-rose-400 mt-0.5 flex-shrink-0" />
+          <MapPin className="w-4 h-4 text-rose-600 dark:text-rose-400 mt-0.5 flex-shrink-0" />
           <div className="overflow-hidden">
             <span className="text-[10px] uppercase font-bold text-slate-500 block">Destination</span>
-            <span className="text-slate-200 font-semibold truncate block">
+            <span className="text-slate-800 dark:text-slate-200 font-semibold truncate block">
               {journey.destinationName || journey.destination}
             </span>
           </div>
@@ -209,24 +208,24 @@ export function JourneyCard({
 
       {/* Timers & Status Grid */}
       <div className="grid grid-cols-2 gap-2 text-xs">
-        <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
-          <div className="flex items-center gap-1 text-slate-400 text-[10px] mb-0.5">
-            <Clock className="w-3 h-3 text-indigo-400" />
+        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-[10px] mb-0.5">
+            <Clock className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
             <span>Expected Arrival</span>
           </div>
-          <span className="font-bold text-white font-mono">{formatTime(journey.expectedArrival)}</span>
-          <span className={`text-[10px] font-mono block ${isAttentionRequired ? "text-amber-400 font-bold" : "text-indigo-300"}`}>
+          <span className="font-bold text-slate-900 dark:text-white font-mono">{formatTime(journey.expectedArrival)}</span>
+          <span className={`text-[10px] font-mono block ${isAttentionRequired ? "text-amber-600 dark:text-amber-400 font-bold" : "text-indigo-600 dark:text-indigo-300"}`}>
             {etaRemaining}
           </span>
         </div>
 
-        <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
-          <div className="flex items-center gap-1 text-slate-400 text-[10px] mb-0.5">
-            <Activity className="w-3 h-3 text-emerald-400" />
+        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-[10px] mb-0.5">
+            <Activity className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
             <span>Last Check-In</span>
           </div>
-          <span className="font-bold text-white font-mono">{formatTime(journey.lastCheckIn)}</span>
-          <span className="text-[10px] text-slate-400 block truncate">
+          <span className="font-bold text-slate-900 dark:text-white font-mono">{formatTime(journey.lastCheckIn)}</span>
+          <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
             Every {journey.checkInIntervalMins || 10}m
           </span>
         </div>
@@ -234,8 +233,8 @@ export function JourneyCard({
 
       {/* Check-In Confirmation Banner */}
       {confirmationText && (
-        <div className="p-2.5 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-xs text-emerald-300 flex items-center gap-2 animate-in fade-in">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+        <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-500/40 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2 animate-in fade-in">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
           <span>{confirmationText}</span>
         </div>
       )}
@@ -256,12 +255,12 @@ export function JourneyCard({
 
       {/* Trusted Contacts in Corridor */}
       {trustedContacts && trustedContacts.length > 0 && (
-        <div className="pt-1 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-800/80">
+        <div className="pt-1 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-slate-800/80">
           <div className="flex items-center gap-1.5">
-            <Users className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Emergency Network: <strong>{trustedContacts.length} contacts active</strong></span>
+            <Users className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+            <span>Emergency Network: <strong className="text-slate-800 dark:text-slate-200">{trustedContacts.length} contacts active</strong></span>
           </div>
-          <span className="text-[10px] text-indigo-300">Ready</span>
+          <span className="text-[10px] text-indigo-600 dark:text-indigo-300">Ready</span>
         </div>
       )}
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { CheckCircle2, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { Coordinates } from "@/types";
 
 interface CheckInButtonProps {
@@ -34,7 +34,7 @@ export function CheckInButton({ onCheckIn, lastCheckIn, disabled }: CheckInButto
           isCheckedIn
             ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 ring-2 ring-emerald-400/50"
             : disabled
-            ? "bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700"
+            ? "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-slate-700"
             : "bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-xl shadow-emerald-600/25 border border-emerald-500/40"
         }`}
       >
@@ -45,7 +45,7 @@ export function CheckInButton({ onCheckIn, lastCheckIn, disabled }: CheckInButto
       </button>
 
       {confirmationMsg && isCheckedIn && (
-        <p className="text-[11px] text-emerald-300 text-center font-medium animate-in fade-in">
+        <p className="text-[11px] text-emerald-700 dark:text-emerald-300 text-center font-medium animate-in fade-in">
           {confirmationMsg}
         </p>
       )}

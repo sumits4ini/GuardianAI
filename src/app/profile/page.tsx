@@ -8,7 +8,7 @@ import { DemoControllerBar } from "@/components/demo/demo-controller-bar";
 import { TrustedContacts } from "@/components/safety/TrustedContacts";
 import { SOSEmergencyModal } from "@/components/sos/sos-emergency-modal";
 import { useAuth } from "@/hooks/useAuth";
-import { User, Shield, Phone, Mail, Heart, Save, Key, AlertCircle, CheckCircle2, Lock } from "lucide-react";
+import { User, Mail, Heart, Save, AlertCircle, CheckCircle2, Lock } from "lucide-react";
 
 export default function ProfilePage() {
   const {
@@ -19,7 +19,6 @@ export default function ProfilePage() {
     addContact,
     updateContact,
     deleteContact,
-    loading,
     error,
   } = useAuth();
 
@@ -65,7 +64,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col pb-16 lg:pb-0">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col pb-16 lg:pb-0 transition-colors duration-200">
       <Navbar />
       <DemoControllerBar />
 
@@ -75,12 +74,12 @@ export default function ProfilePage() {
         <main className="flex-1 p-4 sm:p-6 space-y-6">
           
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+            <div className="p-2.5 rounded-xl bg-indigo-100 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-400">
               <User className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">Profile & Safety Network</h1>
-              <p className="text-xs text-slate-400">Emergency identity info, medical notes & trusted contacts</p>
+              <h1 className="text-xl font-bold text-slate-900 dark:text-white">Profile & Safety Network</h1>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Emergency identity info, medical notes & trusted contacts</p>
             </div>
           </div>
 
@@ -88,22 +87,22 @@ export default function ProfilePage() {
             
             {/* Left Col (6 cols): Profile Details */}
             <div className="lg:col-span-6 space-y-6">
-              <div className="p-5 rounded-2xl glass-panel-elevated border border-slate-800 space-y-4">
+              <div className="p-5 rounded-2xl glass-panel-elevated border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-white">Traveler Identity & Medical Notes</h3>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">Traveler Identity & Medical Notes</h3>
                   <span className="text-[10px] font-mono text-slate-500">PROTECTED RLS</span>
                 </div>
 
                 {successMsg && (
-                  <div className="p-3 rounded-xl bg-emerald-950/50 border border-emerald-500/40 text-xs text-emerald-300 flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-500/40 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                     <span>{successMsg}</span>
                   </div>
                 )}
 
                 {(localError || error) && (
-                  <div className="p-3 rounded-xl bg-rose-950/50 border border-rose-500/40 text-xs text-rose-300 flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+                  <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-300 dark:border-rose-500/40 text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0" />
                     <span>{localError || error}</span>
                   </div>
                 )}
@@ -112,61 +111,61 @@ export default function ProfilePage() {
                   
                   {/* User ID (Immutable & Read-Only) */}
                   <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1 flex items-center gap-1">
-                      <Lock className="w-3 h-3 text-slate-500" />
+                    <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1">
+                      <Lock className="w-3 h-3 text-slate-400 dark:text-slate-500" />
                       <span>User ID (Immutable)</span>
                     </label>
                     <input
                       type="text"
                       value={user?.id || profile?.id || "usr_guardian_01"}
                       disabled
-                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-500 font-mono cursor-not-allowed select-all"
+                      className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs text-slate-500 font-mono cursor-not-allowed select-all"
                     />
                   </div>
 
                   {/* Email (Read-Only) */}
                   <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1 flex items-center gap-1">
-                      <Mail className="w-3 h-3 text-slate-500" />
+                    <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1">
+                      <Mail className="w-3 h-3 text-slate-400 dark:text-slate-500" />
                       <span>Registered Email</span>
                     </label>
                     <input
                       type="email"
                       value={user?.email || profile?.email || "alex.rivera@guardian.safe"}
                       disabled
-                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 cursor-not-allowed"
+                      className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 cursor-not-allowed"
                     />
                   </div>
 
                   {/* Full Name */}
                   <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">Full Name</label>
+                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Full Name</label>
                     <input
                       type="text"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       required
                       placeholder="Your Full Name"
-                      className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 shadow-sm"
                     />
                   </div>
 
                   {/* Phone Number */}
                   <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">Emergency Phone Number</label>
+                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Emergency Phone Number</label>
                     <input
                       type="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="+1 (555) 000-0000"
-                      className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 shadow-sm"
                     />
                   </div>
 
                   {/* Emergency Medical Notes */}
                   <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1">
-                      <Heart className="w-3 h-3 text-rose-400" />
+                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
+                      <Heart className="w-3 h-3 text-rose-500 dark:text-rose-400" />
                       <span>Emergency Medical & Safety Notes</span>
                     </label>
                     <textarea
@@ -174,7 +173,7 @@ export default function ProfilePage() {
                       value={emergencyNotes}
                       onChange={(e) => setEmergencyNotes(e.target.value)}
                       placeholder="Blood type (e.g. O+), severe allergies (penicillin, nuts), inhaler/epipen carried in backpack..."
-                      className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500 resize-none leading-relaxed"
+                      className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 resize-none leading-relaxed shadow-sm"
                     />
                   </div>
 

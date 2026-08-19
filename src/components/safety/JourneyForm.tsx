@@ -5,7 +5,7 @@ import Link from "next/link";
 import { PRESET_JOURNEYS } from "@/lib/store/mock-data";
 import { Coordinates } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
-import { MapPin, Navigation, Compass, ShieldCheck, AlertTriangle, UserPlus } from "lucide-react";
+import { MapPin, Navigation, ShieldCheck, AlertTriangle } from "lucide-react";
 
 interface JourneyFormProps {
   currentCoords: Coordinates;
@@ -57,19 +57,19 @@ export function JourneyForm({ currentCoords, onSubmit }: JourneyFormProps) {
     <div className="space-y-4">
       {/* Zero Contacts Recommendation Banner */}
       {trustedContacts.length === 0 && (
-        <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-500/40 text-xs text-amber-300 flex items-start justify-between gap-2">
+        <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-500/40 text-xs text-amber-900 dark:text-amber-300 flex items-start justify-between gap-2 shadow-sm">
           <div className="flex items-start gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+            <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
             <div>
               <span className="font-bold block">Recommended Safety Step</span>
-              <span className="text-[11px] text-amber-200/80">
+              <span className="text-[11px] text-amber-800 dark:text-amber-200/80">
                 You currently have 0 trusted contacts. Add at least one contact so they can receive automated high-risk or SOS alerts.
               </span>
             </div>
           </div>
           <Link
             href="/profile"
-            className="text-[11px] font-bold px-2 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 rounded border border-amber-500/40 whitespace-nowrap"
+            className="text-[11px] font-bold px-2 py-1 bg-amber-100 dark:bg-amber-500/20 hover:bg-amber-200 dark:hover:bg-amber-500/30 text-amber-800 dark:text-amber-200 rounded border border-amber-300 dark:border-amber-500/40 whitespace-nowrap"
           >
             Add Contact
           </Link>
@@ -78,7 +78,7 @@ export function JourneyForm({ currentCoords, onSubmit }: JourneyFormProps) {
 
       {/* Preset Routes */}
       <div className="space-y-2">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
           Preset Routes
         </span>
         <div className="grid grid-cols-1 gap-2">
@@ -87,13 +87,13 @@ export function JourneyForm({ currentCoords, onSubmit }: JourneyFormProps) {
               key={idx}
               type="button"
               onClick={() => handleSelectPreset(preset)}
-              className="text-left p-2.5 rounded-xl bg-slate-900/80 hover:bg-indigo-950/40 border border-slate-800 hover:border-indigo-500/40 transition-all group"
+              className="text-left p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 border border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500/40 transition-all group shadow-sm"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-200 group-hover:text-indigo-300">
+                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-300">
                   {preset.name}
                 </span>
-                <span className="text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded">
+                <span className="text-[10px] text-slate-600 dark:text-slate-400 bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded">
                   ~{preset.defaultDurationMins}m
                 </span>
               </div>
@@ -105,38 +105,38 @@ export function JourneyForm({ currentCoords, onSubmit }: JourneyFormProps) {
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
-          <label className="block text-xs font-medium text-slate-300 mb-1">Origin Point</label>
+          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Origin Point</label>
           <div className="relative">
             <input
               type="text"
               value={originName}
               onChange={(e) => setOriginName(e.target.value)}
               required
-              className="w-full px-3 py-2 pl-9 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full px-3 py-2 pl-9 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500 shadow-sm"
             />
-            <Navigation className="w-4 h-4 text-emerald-400 absolute left-3 top-2.5" />
+            <Navigation className="w-4 h-4 text-emerald-600 dark:text-emerald-400 absolute left-3 top-2.5" />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-slate-300 mb-1">Destination</label>
+          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Destination</label>
           <div className="relative">
             <input
               type="text"
               value={destName}
               onChange={(e) => setDestName(e.target.value)}
               required
-              className="w-full px-3 py-2 pl-9 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full px-3 py-2 pl-9 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500 shadow-sm"
             />
-            <MapPin className="w-4 h-4 text-rose-400 absolute left-3 top-2.5" />
+            <MapPin className="w-4 h-4 text-rose-600 dark:text-rose-400 absolute left-3 top-2.5" />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3 pt-1">
-          <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 shadow-sm">
             <div className="flex justify-between items-center mb-1">
-              <span className="text-[11px] text-slate-400">Duration</span>
-              <span className="text-xs font-bold text-white font-mono">{durationMins} mins</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">Duration</span>
+              <span className="text-xs font-bold text-slate-900 dark:text-white font-mono">{durationMins} mins</span>
             </div>
             <input
               type="range"
@@ -145,14 +145,14 @@ export function JourneyForm({ currentCoords, onSubmit }: JourneyFormProps) {
               step={5}
               value={durationMins}
               onChange={(e) => setDurationMins(Number(e.target.value))}
-              className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+              className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-600 dark:accent-indigo-500"
             />
           </div>
 
-          <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 shadow-sm">
             <div className="flex justify-between items-center mb-1">
-              <span className="text-[11px] text-slate-400">Check-in</span>
-              <span className="text-xs font-bold text-indigo-300 font-mono">Every {checkInIntervalMins}m</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">Check-in</span>
+              <span className="text-xs font-bold text-indigo-600 dark:text-indigo-300 font-mono">Every {checkInIntervalMins}m</span>
             </div>
             <input
               type="range"
@@ -161,7 +161,7 @@ export function JourneyForm({ currentCoords, onSubmit }: JourneyFormProps) {
               step={5}
               value={checkInIntervalMins}
               onChange={(e) => setCheckInIntervalMins(Number(e.target.value))}
-              className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+              className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-600 dark:accent-indigo-500"
             />
           </div>
         </div>
